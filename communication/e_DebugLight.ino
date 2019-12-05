@@ -1,7 +1,7 @@
 #include <ChainableLED.h>
 #define NUM_LEDS 2
 
-ChainableLED leds(2, 3, NUM_LEDS);
+ChainableLED leds(4, 5, NUM_LEDS);
 
 void setupLight() {
   leds.init();

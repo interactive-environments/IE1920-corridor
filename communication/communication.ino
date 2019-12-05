@@ -9,7 +9,6 @@ void loopPresence();
 
 void setupWave();
 void loopWave();
-void loopWaveDebug();
 
 void setup() {
   setupLight();
@@ -37,8 +36,6 @@ void loop() {
   loopComms();
   loopPresence();
   loopWave();
-  
-  loopWaveDebug();
 
   delay(100);
 }

@@ -7,11 +7,13 @@ uint16_t history[HIST];
 uint16_t historySorted[HIST];
 int pointer = 0;
 
-#define PIR_PIN 4
+#define PIR_PIN 6
+#define DEBUG_BTN_PIN 2
 
 void setupPresence()
 {
   pinMode(PIR_PIN, INPUT);
+  pinMode(DEBUG_BTN_PIN, INPUT);
 
   Serial.begin(9600);
   for (int i = 0; i < 10 && !Serial; i++) {
@@ -23,14 +25,14 @@ void setupPresence()
   if (VL53L0X_ERROR_NONE != Status) {
     Serial.println("start vl53l0x mesurement failed!");
     VL53L0X.print_pal_error(Status);
-    while (1);
+    // while (1);
   }
 
   VL53L0X.VL53L0X_long_distance_ranging_init();
   if (VL53L0X_ERROR_NONE != Status) {
     Serial.println("start vl53l0x mesurement failed!");
     VL53L0X.print_pal_error(Status);
-    while (1);
+    // while (1);
   }
 }
 
@@ -75,5 +77,10 @@ void loopPresence()
   } else {
     Serial.print("measurement failed !! Status code =");
     Serial.println(Status);
+  }
+
+  if (digitalRead(DEBUG_BTN_PIN)) {
+    Serial.println("TOF Simulated");
+    broadcastPacket("tof");
   }
 }

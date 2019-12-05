@@ -8,6 +8,7 @@ class UnitState {
     
     void handlePacket(String data);
     bool hasPresence();
+    void forceTimeout();
   private:
     void checkTriggeredValid();
 };
@@ -25,6 +26,10 @@ void UnitState::handlePacket(String data) {
 bool UnitState::hasPresence() {
   checkTriggeredValid();
   return isTriggered;
+}
+
+void UnitState::forceTimeout() {
+  isTriggered = false;
 }
 
 void UnitState::checkTriggeredValid() {
