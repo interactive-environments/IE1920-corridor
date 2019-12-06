@@ -1,25 +1,13 @@
 #define RATE 115200
-#define MAX_UNITS 12
 
 #define MAX_PACKET_LENGTH 12
 
-UnitState states[MAX_UNITS];
-int lowestNegative = 0;
-int highestPositive = 0;
+UnitIndexer units;
 
 Stream* Conn[2];
 String buff[2];
 bool hasChecksum[2];
 byte checksum[2];
-
-int stateIndex(int offset) {
-  if (offset < lowestNegative || offset > highestPositive) {
-    Serial.print("Invalid state index requested: ");
-    Serial.println(offset);
-    return -1;
-  }
-  return (offset + MAX_UNITS) % MAX_UNITS;
-}
 
 void setupComms() {
   Conn[0] = &Serial1;
@@ -29,45 +17,7 @@ void setupComms() {
   Serial2.begin(RATE);
 
   for (int i = 0; i < 2; i++) {
-    // Conn[i]->setTimeout(4);
     hasChecksum[i] = false;
-  }
-}
-
-void handlePacket(int offset, String packet) {
-  if (offset < lowestNegative) {
-    if (highestPositive - offset >= MAX_UNITS) {
-      Serial.println("Did not process packet, negative offset can not fit in buffer.");
-      return;
-    }
-    lowestNegative = offset;
-  } else if (offset > highestPositive) {
-    if (offset - lowestNegative >= MAX_UNITS) {
-      Serial.println("Did not process packet, positive offset can not fit in buffer.");
-      return;
-    }
-    highestPositive = offset;
-  }
-
-  Serial.print("RECV ");
-  Serial.print(offset);
-  Serial.print(": ");
-  Serial.println(packet);
-
-  int index = stateIndex(offset);
-  bool hadPresence = states[index].hasPresence();
-
-  states[index].handlePacket(packet);
-
-  // If this packet made a unit gain presence, disable neighbouring presence.
-  // To-Do: Move this code into a presence wrapper class.
-  if (!hadPresence && states[index].hasPresence()) {
-    if (offset > lowestNegative) {
-      states[stateIndex(offset - 1)].forceTimeout();
-    }
-    if (offset < highestPositive) {
-      states[stateIndex(offset + 1)].forceTimeout();
-    }
   }
 }
 
@@ -84,7 +34,7 @@ void sendPacket(int line, int fromOffset, String packet) {
 
 void broadcastPacket(String packet) {
   // Handle the packet ourselves first.
-  handlePacket(0, packet);
+  units.handlePacket(0, packet);
   sendPacket(1, -1, packet); // To Right
   sendPacket(0, 1, packet); // To Left
 }
@@ -94,7 +44,7 @@ void packetReceived(int i) {
     int offset = int(int8_t(buff[i].charAt(0)));
     String packet = buff[i].substring(1);
 
-    handlePacket(offset, packet);
+    units.handlePacket(offset, packet);
     if (i == 0) {
       sendPacket(1, offset - 1, packet); // To Right
     } else {

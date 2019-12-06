@@ -13,21 +13,21 @@ float peakNormalizedGaussian(float d, float s) {
 }
 
 bool hasPeak(int offset) {
-  int index = stateIndex(offset);
+  UnitState* state = units.getState(offset);
   // If there is no one here, there can never be a peak.
-  if (!states[index].hasPresence()) {
+  if (!state->hasPresence()) {
     return false;
   }
-  unsigned long TOFTime = states[index].lastTOFTrigger;
+  unsigned long TOFTime = state->lastTOFTrigger;
   // If one of the adjacent TOF triggers happened after this one, disable the peak.
-  return (offset <= lowestNegative || TOFTime >= states[stateIndex(offset - 1)].lastTOFTrigger)
-      && (offset >= highestPositive || TOFTime >= states[stateIndex(offset + 1)].lastTOFTrigger);
+  return (offset <= units.lowestNegative || TOFTime >= units.getState(offset - 1)->lastTOFTrigger)
+      && (offset >= units.highestPositive || TOFTime >= units.getState(offset + 1)->lastTOFTrigger);
 }
 
 int nearestPeakDist() {
-  for (int d = 0; d <= max(-lowestNegative, highestPositive); d++) {
-    if ((d <= -lowestNegative && hasPeak(-d))
-        || (d != 0 && d <= highestPositive && hasPeak(d))) {
+  for (int d = 0; d <= max(-units.lowestNegative, units.highestPositive); d++) {
+    if ((d <= -units.lowestNegative && hasPeak(-d))
+        || (d != 0 && d <= units.highestPositive && hasPeak(d))) {
       return d;
     }
   }
@@ -39,8 +39,8 @@ void setupWave() {
 }
 
 void debugPrintWave() {
-  for (int offset = lowestNegative; offset <= highestPositive; offset++) {
-    bool isUnitOpen = states[stateIndex(offset)].hasPresence();
+  for (int offset = units.lowestNegative; offset <= units.highestPositive; offset++) {
+    bool isUnitOpen = units.getState(offset)->hasPresence();
     Serial.print(offset);
     Serial.print(" = ");
     Serial.println(isUnitOpen);
@@ -49,7 +49,7 @@ void debugPrintWave() {
 
 void loopWave() {
   // Make the first LED red if there is presence here.
-  setLight(0, 255 * states[0].hasPresence(), 0, 0);
+  setLight(0, 255 * units.getState(0)->hasPresence(), 0, 0);
   
   int d = nearestPeakDist();
   // Update the second LED with the wave effect
