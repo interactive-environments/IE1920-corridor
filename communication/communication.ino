@@ -17,7 +17,7 @@ void setup() {
   setLight(0, 0, 255, 0);
   setLight(1, 0, 255, 0);
   
-  Serial.begin(9600);
+  Serial.begin(115200);
   for (int i = 0; i < 10 && !Serial; i++) {
     delay(100);
   }
@@ -36,6 +36,4 @@ void loop() {
   loopComms();
   loopPresence();
   loopWave();
-
-  delay(100);
 }

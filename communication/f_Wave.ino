@@ -38,6 +38,15 @@ void setupWave() {
   
 }
 
+void debugPrintWave() {
+  for (int offset = lowestNegative; offset <= highestPositive; offset++) {
+    bool isUnitOpen = states[stateIndex(offset)].hasPresence();
+    Serial.print(offset);
+    Serial.print(" = ");
+    Serial.println(isUnitOpen);
+  }
+}
+
 void loopWave() {
   // Make the first LED red if there is presence here.
   setLight(0, 255 * states[0].hasPresence(), 0, 0);
@@ -45,7 +54,7 @@ void loopWave() {
   int d = nearestPeakDist();
   // Update the second LED with the wave effect
   if (d == NO_PEAK) {
-    Serial.println("No nearby peaks");
+    Serial.println("No peak");
     setLight(1, 0, 0, 0);
   } else {
     Serial.print("Nearest peak = ");
@@ -53,11 +62,5 @@ void loopWave() {
     setLight(1, 0, 0, int(255.f / float(abs(d) + 1)));
   }
 
-  // DEBUG PRINT
-  for (int offset = lowestNegative; offset <= highestPositive; offset++) {
-    bool isUnitOpen = states[stateIndex(offset)].hasPresence();
-    Serial.print(offset);
-    Serial.print(" = ");
-    Serial.println(isUnitOpen);
-  }
+  //debugPrintWave();
 }

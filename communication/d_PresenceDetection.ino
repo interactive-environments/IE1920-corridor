@@ -1,10 +1,10 @@
 #include "Seeed_vl53l0x.h"
 Seeed_vl53l0x VL53L0X;
 
+#define TOF_DIST_SENSE 1500
 #define HIST 5
 
 uint16_t history[HIST];
-uint16_t historySorted[HIST];
 int pointer = 0;
 
 #define PIR_PIN 6
@@ -54,25 +54,15 @@ void loopPresence()
     history[pointer] = RangingMeasurementData.RangeMilliMeter;
     if (++pointer == HIST) pointer = 0;
 
+    int maxMeasure = 0;
     for (int i = 0; i < HIST; i++) {
-      historySorted[i] = history[i];
-      for (int j = i - 1; j >= 0; j--) {
-        if (historySorted[j + 1] < historySorted[j]) {
-          historySorted[j + 1] = historySorted[j];
-          historySorted[j] = history[i];
-        }
-      }
+      maxMeasure = max(maxMeasure, history[i]);
     }
 
-    int measure = int(historySorted[HIST / 2]);
-    if (measure >= 4000) {
-      Serial.print("TOF Out Of Range: ");
-    } else {
-      Serial.print("TOF MOTION: ");
+    int measure = maxMeasure;
+    if (measure < TOF_DIST_SENSE) {
       broadcastPacket("tof");
     }
-    Serial.print(measure);
-    Serial.println(" mm");
 
   } else {
     Serial.print("measurement failed !! Status code =");
