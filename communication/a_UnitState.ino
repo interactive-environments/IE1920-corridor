@@ -4,32 +4,38 @@ class UnitState {
   public:
     unsigned long lastTOFTrigger = 0;
     unsigned long lastPIRTrigger = 0;
+    unsigned long TOFTriggerDiff = 0;
     bool isTriggered = false;
     
-    void handlePacket(String data);
     bool hasPresence();
-    void forceTimeout();
+    bool forceTimeout();
+    void triggerTOF(int triggerDiff);
+    void triggerPIR();
   private:
     void checkTriggeredValid();
 };
-
-void UnitState::handlePacket(String data) {
-  if (data == "tof") {
-    isTriggered = true;
-    lastTOFTrigger = millis();
-  } else if (data == "pir") {
-    checkTriggeredValid();
-    lastPIRTrigger = millis();
-  }
-}
 
 bool UnitState::hasPresence() {
   checkTriggeredValid();
   return isTriggered;
 }
 
-void UnitState::forceTimeout() {
+bool UnitState::forceTimeout() {
+  checkTriggeredValid();
+  bool wasTriggered = isTriggered;
   isTriggered = false;
+  return wasTriggered;
+}
+
+void UnitState::triggerTOF(int triggerDiff) {
+  isTriggered = true;
+  lastTOFTrigger = millis();
+  TOFTriggerDiff = triggerDiff;
+}
+
+void UnitState::triggerPIR() {
+  checkTriggeredValid();
+  lastPIRTrigger = millis();
 }
 
 void UnitState::checkTriggeredValid() {

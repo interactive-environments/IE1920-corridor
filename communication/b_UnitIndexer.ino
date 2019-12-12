@@ -1,10 +1,12 @@
 #define MAX_UNITS 12
+#define DEFAULT_LASER_TRIGGER_DIFF 1000
+#define CONST_SPEED_FACTOR 0.33
 
 class UnitIndexer {
   public:
     int lowestNegative = 0;
     int highestPositive = 0;
-    
+
     bool handlePacket(int offset, String packet);
     UnitState* getState(int offset);
   private:
@@ -28,25 +30,37 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
     highestPositive = offset;
   }
 
-  Serial.print("RECV ");
-  Serial.print(offset);
-  Serial.print(": ");
-  Serial.println(packet);
+  slog("RECV ");
+  slog(String(offset));
+  slog(": ");
+  slogln(String(packet));
 
   int index = stateIndex(offset);
   bool hadPresence = states[index].hasPresence();
 
-  states[index].handlePacket(packet);
+  if (packet == "tof") {
+    int cameFrom = 0;
+    if (offset > lowestNegative && states[stateIndex(offset - 1)].forceTimeout()) {
+      // Walking forwards.
+      cameFrom = stateIndex(offset - 1);
+    } else if (offset < highestPositive && states[stateIndex(offset + 1)].forceTimeout()) {
+      cameFrom = stateIndex(offset + 1);
+    }
 
-  // If this packet made a unit gain presence, disable neighbouring presence.
-  // To-Do: Move this code into a presence wrapper class.
-  if (!hadPresence && states[index].hasPresence()) {
-    if (offset > lowestNegative) {
-      states[stateIndex(offset - 1)].forceTimeout();
+    // Trigger diff determines walking speed based animations.
+    int triggerDiff = DEFAULT_LASER_TRIGGER_DIFF;
+    if (cameFrom != 0) {
+      float tofTriggerDiff = millis() - states[cameFrom].lastPIRTrigger;
+      tofTriggerDiff = (1.f - CONST_SPEED_FACTOR) * triggerDiff
+                       + CONST_SPEED_FACTOR * states[cameFrom].TOFTriggerDiff;
+      if (tofTriggerDiff < triggerDiff) {
+        triggerDiff = tofTriggerDiff;
+      }
     }
-    if (offset < highestPositive) {
-      states[stateIndex(offset + 1)].forceTimeout();
-    }
+
+    states[index].triggerTOF(triggerDiff);
+  } else if (packet == "pir") {
+    states[index].triggerPIR();
   }
 
   return true;

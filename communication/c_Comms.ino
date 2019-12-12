@@ -10,16 +10,24 @@ bool hasChecksum[2];
 byte checksum[2];
 
 void setupComms() {
-  Conn[0] = &Serial1;
-  Conn[1] = &Serial2;
+  Conn[0] = &Serial2;
+  Conn[1] = &Serial3;
 
-  Serial1.begin(RATE);
   Serial2.begin(RATE);
+  Serial3.begin(RATE);
 
   for (int i = 0; i < 2; i++) {
     hasChecksum[i] = false;
   }
 }
+
+/*
+void sendRedundantPacket(int line, int fromOffset, String packet) {
+  for (int i = 0; i < 3; i++) {
+    sendPacket(line, fromOffset, packet);
+  }
+}
+*/
 
 void sendPacket(int line, int fromOffset, String packet) {
   byte checksum = int8_t(fromOffset);
