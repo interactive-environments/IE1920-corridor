@@ -29,7 +29,7 @@ void PhysicalMovement::setTarget(float target) {
   mTarget = target;
   //mServo.goTo(int(target * 180.f));
   //mServo.goTo(0);
-  mServo.write(90 + int(target * 90.f));
+  mServo.write(int(target * 60.f));
   
   // Uncomment line below to use natural exponent.
   //float base = 2.718f;

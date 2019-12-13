@@ -2,10 +2,12 @@
 Seeed_vl53l0x VL53L0X;
 
 #define TOF_DIST_SENSE 1500
+#define TOF_DIST_BLOCK 100
 #define HIST 5
 
 uint16_t history[HIST];
 int pointer = 0;
+bool presenceError = false;
 
 #define PIR_PIN 7
 
@@ -18,14 +20,14 @@ void setupPresence()
   if (VL53L0X_ERROR_NONE != Status) {
     Serial.println("start vl53l0x mesurement failed!");
     VL53L0X.print_pal_error(Status);
-    // while (1);
+    presenceError = true;
   }
 
   VL53L0X.VL53L0X_long_distance_ranging_init();
   if (VL53L0X_ERROR_NONE != Status) {
     Serial.println("start vl53l0x mesurement failed!");
     VL53L0X.print_pal_error(Status);
-    // while (1);
+    presenceError = true;
   }
 }
 
@@ -53,8 +55,9 @@ void loopPresence()
     }
 
     int measure = maxMeasure;
-    if (measure < TOF_DIST_SENSE) {
-      slogln("TOF MOTION");
+    if (measure < TOF_DIST_SENSE && measure > TOF_DIST_BLOCK) {
+      slog("TOF MOTION ");
+      slogln(String(measure));
       broadcastPacket("tof");
     }
   } else {

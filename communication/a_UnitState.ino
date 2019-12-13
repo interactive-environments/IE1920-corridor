@@ -1,4 +1,4 @@
-#define PIR_TIMEOUT_MS 1500
+#define TIMEOUT_MS 2500
 
 class UnitState {
   public:
@@ -39,7 +39,7 @@ void UnitState::triggerPIR() {
 }
 
 void UnitState::checkTriggeredValid() {
-  if (millis() - max(lastTOFTrigger, lastPIRTrigger) >= PIR_TIMEOUT_MS) {
+  if (millis() - max(lastTOFTrigger, lastPIRTrigger) >= TIMEOUT_MS) {
     isTriggered = false;
   }
 }

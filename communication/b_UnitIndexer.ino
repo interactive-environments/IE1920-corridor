@@ -39,11 +39,13 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
   bool hadPresence = states[index].hasPresence();
 
   if (packet == "tof") {
+    /*
     int cameFrom = 0;
     if (offset > lowestNegative && states[stateIndex(offset - 1)].forceTimeout()) {
       // Walking forwards.
       cameFrom = stateIndex(offset - 1);
     } else if (offset < highestPositive && states[stateIndex(offset + 1)].forceTimeout()) {
+      // Walking backwards.
       cameFrom = stateIndex(offset + 1);
     }
 
@@ -57,7 +59,9 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
         triggerDiff = tofTriggerDiff;
       }
     }
+    */
 
+    int triggerDiff = DEFAULT_LASER_TRIGGER_DIFF;
     states[index].triggerTOF(triggerDiff);
   } else if (packet == "pir") {
     states[index].triggerPIR();

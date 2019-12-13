@@ -1,6 +1,7 @@
 #define RATE 115200
 
 #define MAX_PACKET_LENGTH 12
+#define REDUNDANCY 3
 
 UnitIndexer units;
 
@@ -10,8 +11,8 @@ bool hasChecksum[2];
 byte checksum[2];
 
 void setupComms() {
-  Conn[0] = &Serial2;
-  Conn[1] = &Serial3;
+  Conn[1] = &Serial2;
+  Conn[0] = &Serial3;
 
   Serial2.begin(RATE);
   Serial3.begin(RATE);
@@ -21,13 +22,11 @@ void setupComms() {
   }
 }
 
-/*
 void sendRedundantPacket(int line, int fromOffset, String packet) {
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < REDUNDANCY; i++) {
     sendPacket(line, fromOffset, packet);
   }
 }
-*/
 
 void sendPacket(int line, int fromOffset, String packet) {
   byte checksum = int8_t(fromOffset);
@@ -43,8 +42,8 @@ void sendPacket(int line, int fromOffset, String packet) {
 void broadcastPacket(String packet) {
   // Handle the packet ourselves first.
   units.handlePacket(0, packet);
-  sendPacket(1, -1, packet); // To Right
-  sendPacket(0, 1, packet); // To Left
+  sendRedundantPacket(1, -1, packet); // To Right
+  sendRedundantPacket(0, 1, packet); // To Left
 }
 
 void packetReceived(int i) {

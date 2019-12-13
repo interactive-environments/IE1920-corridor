@@ -1,5 +1,5 @@
 #define NO_PEAK 0xFFFF
-#define SIGMA 1.5f
+#define SIGMA 1.f
 #define VELOCITY_REDUCE_FACTOR 0.75f
 
 PhysicalMovement physical;
@@ -40,12 +40,19 @@ int nearestPeak() {
 }
 
 void setupWave() {
+  while (presenceError) {
+    physical.setTarget(0.f);
+    delay(500);
+    physical.setTarget(1.f);
+    delay(500);
+  }
+  
   physical.setTarget(1.f);
   lastFrameMs = millis();
 }
 
 /*
-void debugPrintWave() {
+  void debugPrintWave() {
   for (int offset = units.lowestNegative; offset <= units.highestPositive; offset++) {
     bool isUnitOpen = units.getState(offset)->hasPresence();
     slog(offset);
@@ -53,21 +60,25 @@ void debugPrintWave() {
     slog(isUnitOpen);
     slogln("");
   }
-}
+  }
 */
 
 void loopWave() {
-  physical.setTarget(1.f);
-  delay(1000);
-  physical.setTarget(0.f);
-  delay(3000);
+  /*
+    physical.setTarget(1.f);
+    delay(2000);
+    physical.setTarget(0.f);
+    delay(3000);
 
-  return;
-  
+    return;
+  */
+
+  /*
   unsigned long currFrameMs = millis();
   const float dt = float(currFrameMs - lastFrameMs) / 1000.f;
   lastFrameMs = currFrameMs;
-  
+  */
+
   int d = nearestPeak();
   float targetOpening = 0.f;
   if (d == NO_PEAK) {
@@ -75,18 +86,21 @@ void loopWave() {
   } else {
     slog("Nearest peak = ");
     slogln(String(d));
-    targetOpening = peakNormalizedGaussian(d, SIGMA);
+    targetOpening = peakNormalizedGaussian(abs(d), SIGMA);
   }
+  
+  physical.setTarget(targetOpening);
 
+  /*
   if (abs(targetOpening - currentOpening) < 0.25f) {
     currentOpening = currentOpening * 0.975f + targetOpening * 0.025f;
   } else {
     const float laserDiffTimeS = float(units.getState(0)->TOFTriggerDiff) / 1000.f;
-    
+
     // 1s laserDiffTime -> rotate once every second
     // 0.5s laserDiffTime -> rotate twice every second
     const float rotVelocity = 1.f / laserDiffTimeS;
-    
+
     if (targetOpening > currentOpening) {
       // Open
       currentOpening = min(targetOpening, currentOpening + rotVelocity * dt * VELOCITY_REDUCE_FACTOR);
@@ -96,5 +110,7 @@ void loopWave() {
     }
   }
 
-  physical.setTarget(currentOpening);
+  //physical.setTarget(currentOpening);
+  //*/
+  //physical.setTarget(d == 0 ? 0.f : 0.f);
 }
