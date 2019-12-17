@@ -1,8 +1,11 @@
 #include <Servo.h>
 //#include <SlowMotionServo.h>
+#include <ChainableLED.h>
 
-#define SERVO_PIN 25
-#define MOSFET_PIN 27
+#define SERVO_PIN 2
+#define MOSFET_PIN 4
+
+ChainableLED leds(25, 26, 1);
 
 class PhysicalMovement {
   public:
@@ -20,7 +23,7 @@ PhysicalMovement::PhysicalMovement() {
   mServo.attach(SERVO_PIN);
   
   pinMode(MOSFET_PIN, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
+  leds.init();
 }
 
 /*
@@ -37,5 +40,6 @@ void PhysicalMovement::setTarget(float target) {
   float base = 9.f;
   float brightness = (pow(base, target) - 1.f) / (base - 1.f);
   analogWrite(MOSFET_PIN, int(brightness * 64.f));
-  digitalWrite(LED_BUILTIN, target > 0.99f ? HIGH : LOW);
+
+  leds.setColorRGB(0, int(255.f * target), 0, 0);
 }

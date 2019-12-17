@@ -6,12 +6,14 @@ class UnitState {
     unsigned long lastPIRTrigger = 0;
     unsigned long TOFTriggerDiff = 0;
     bool isTriggered = false;
-    
+
     bool hasPresence();
-    bool forceTimeout();
+    bool forceTimeout(int duration);
     void triggerTOF(int triggerDiff);
     void triggerPIR();
   private:
+    unsigned long preventTriggerUntil = 0;
+    
     void checkTriggeredValid();
 };
 
@@ -20,22 +22,29 @@ bool UnitState::hasPresence() {
   return isTriggered;
 }
 
-bool UnitState::forceTimeout() {
+bool UnitState::forceTimeout(int duration) {
   checkTriggeredValid();
   bool wasTriggered = isTriggered;
   isTriggered = false;
+  //preventTriggerUntil = millis() + duration;
   return wasTriggered;
 }
 
 void UnitState::triggerTOF(int triggerDiff) {
-  isTriggered = true;
-  lastTOFTrigger = millis();
-  TOFTriggerDiff = triggerDiff;
+  unsigned long now = millis();
+  if (preventTriggerUntil < now) {
+    isTriggered = true;
+    lastTOFTrigger = millis();
+    TOFTriggerDiff = triggerDiff;
+  }
 }
 
 void UnitState::triggerPIR() {
-  checkTriggeredValid();
-  lastPIRTrigger = millis();
+  unsigned long now = millis();
+  if (preventTriggerUntil < now) {
+    checkTriggeredValid();
+    lastPIRTrigger = millis();
+  }
 }
 
 void UnitState::checkTriggeredValid() {

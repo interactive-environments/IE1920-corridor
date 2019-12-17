@@ -1,6 +1,7 @@
 #define MAX_UNITS 12
 #define DEFAULT_LASER_TRIGGER_DIFF 1000
 #define CONST_SPEED_FACTOR 0.33
+#define FORCE_TIMEOUT_MS 500
 
 class UnitIndexer {
   public:
@@ -39,16 +40,16 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
   bool hadPresence = states[index].hasPresence();
 
   if (packet == "tof") {
-    /*
     int cameFrom = 0;
-    if (offset > lowestNegative && states[stateIndex(offset - 1)].forceTimeout()) {
+    if (offset > lowestNegative && states[stateIndex(offset - 1)].forceTimeout(FORCE_TIMEOUT_MS)) {
       // Walking forwards.
       cameFrom = stateIndex(offset - 1);
-    } else if (offset < highestPositive && states[stateIndex(offset + 1)].forceTimeout()) {
+    } else if (offset < highestPositive && states[stateIndex(offset + 1)].forceTimeout(FORCE_TIMEOUT_MS)) {
       // Walking backwards.
       cameFrom = stateIndex(offset + 1);
     }
 
+    /*
     // Trigger diff determines walking speed based animations.
     int triggerDiff = DEFAULT_LASER_TRIGGER_DIFF;
     if (cameFrom != 0) {

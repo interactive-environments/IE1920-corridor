@@ -1,11 +1,14 @@
 #define NO_PEAK 0xFFFF
 #define SIGMA 1.f
 #define VELOCITY_REDUCE_FACTOR 0.75f
+#define FRAME_MS 20
+#define EXP_CHANGE_RATE 0.95f
 
 PhysicalMovement physical;
 float currentOpening = 0.f;
 
-unsigned long lastFrameMs;
+unsigned long lastFrameMs = 0;
+int lastD = NO_PEAK;
 
 float unscaledGaussian(float d, float s) {
   return exp(-0.5f * pow(d / s, 2.f));
@@ -40,10 +43,12 @@ int nearestPeak() {
 }
 
 void setupWave() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  
   while (presenceError) {
-    physical.setTarget(0.f);
+    digitalWrite(LED_BUILTIN, HIGH);
     delay(500);
-    physical.setTarget(1.f);
+    digitalWrite(LED_BUILTIN, LOW);
     delay(500);
   }
   
@@ -63,27 +68,11 @@ void setupWave() {
   }
 */
 
-int lastD = NO_PEAK;
-
-void loopWave() {
-  /*
-    physical.setTarget(1.f);
-    delay(2000);
-    physical.setTarget(0.f);
-    delay(3000);
-
-    return;
-  */
-
-  /*
-  unsigned long currFrameMs = millis();
-  const float dt = float(currFrameMs - lastFrameMs) / 1000.f;
-  lastFrameMs = currFrameMs;
-  */
-
+void tickWave() {
   int d = nearestPeak();
   float targetOpening = 0.f;
-  
+
+  lastD = d + 1;
   if (d == NO_PEAK) {
     if (lastD != d) {
       slogln("No peak");
@@ -96,8 +85,11 @@ void loopWave() {
     targetOpening = peakNormalizedGaussian(abs(d), SIGMA);
   }
   lastD = d;
+
+  currentOpening = currentOpening * EXP_CHANGE_RATE + targetOpening * (1.f - EXP_CHANGE_RATE);
+  physical.setTarget(currentOpening);
   
-  physical.setTarget(targetOpening);
+  digitalWrite(LED_BUILTIN, d == 0 ? HIGH : LOW);
 
   /*
   if (abs(targetOpening - currentOpening) < 0.25f) {
@@ -121,4 +113,12 @@ void loopWave() {
   //physical.setTarget(currentOpening);
   //*/
   //physical.setTarget(d == 0 ? 0.f : 0.f);
+}
+
+void loopWave() {
+  unsigned long now = millis();
+  while (now - lastFrameMs >= FRAME_MS) {
+    tickWave();
+    lastFrameMs += FRAME_MS;
+  }
 }
