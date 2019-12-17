@@ -11,8 +11,8 @@ bool hasChecksum[2];
 byte checksum[2];
 
 void setupComms() {
-  Conn[1] = &Serial2;
-  Conn[0] = &Serial3;
+  Conn[0] = &Serial2;
+  Conn[1] = &Serial3;
 
   Serial2.begin(RATE);
   Serial3.begin(RATE);
@@ -42,8 +42,10 @@ void sendPacket(int line, int fromOffset, String packet) {
 void broadcastPacket(String packet) {
   // Handle the packet ourselves first.
   units.handlePacket(0, packet);
-  sendRedundantPacket(1, -1, packet); // To Right
-  sendRedundantPacket(0, 1, packet); // To Left
+  sendPacket(1, -1, packet); // To Right
+  sendPacket(0, 1, packet); // To Left
+  //sendRedundantPacket(1, -1, packet); // To Right
+  //sendRedundantPacket(0, 1, packet); // To Left
 }
 
 void packetReceived(int i) {

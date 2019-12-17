@@ -63,6 +63,8 @@ void setupWave() {
   }
 */
 
+int lastD = NO_PEAK;
+
 void loopWave() {
   /*
     physical.setTarget(1.f);
@@ -81,13 +83,19 @@ void loopWave() {
 
   int d = nearestPeak();
   float targetOpening = 0.f;
+  
   if (d == NO_PEAK) {
-    slogln("No peak");
+    if (lastD != d) {
+      slogln("No peak");
+    }
   } else {
-    slog("Nearest peak = ");
-    slogln(String(d));
+    if (lastD != d) {
+      slog("Nearest peak = ");
+      slogln(String(d));
+    }
     targetOpening = peakNormalizedGaussian(abs(d), SIGMA);
   }
+  lastD = d;
   
   physical.setTarget(targetOpening);
 

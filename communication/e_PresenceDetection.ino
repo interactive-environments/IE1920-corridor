@@ -1,38 +1,42 @@
 #include "Seeed_vl53l0x.h"
-Seeed_vl53l0x VL53L0X;
+Seeed_vl53l0x ranger;
 
-#define TOF_DIST_SENSE 1500
-#define TOF_DIST_BLOCK 100
-#define HIST 5
+#define TOF_DIST_SENSE 1750
+#define TOF_DIST_BLOCK 50
 
-uint16_t history[HIST];
-int pointer = 0;
+#define PIR_PIN 36
+
 bool presenceError = false;
 
-#define PIR_PIN 7
-
-void setupPresence()
-{
+void setupPresence() {
   pinMode(PIR_PIN, INPUT);
 
   VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-  Status = VL53L0X.VL53L0X_common_init();
-  if (VL53L0X_ERROR_NONE != Status) {
-    Serial.println("start vl53l0x mesurement failed!");
-    VL53L0X.print_pal_error(Status);
+  Status = ranger.VL53L0X_common_init();
+  if (Status != VL53L0X_ERROR_NONE) {
+    Serial.println("Init vl53l0x failed");
+    ranger.print_pal_error(Status);
     presenceError = true;
   }
 
-  VL53L0X.VL53L0X_long_distance_ranging_init();
-  if (VL53L0X_ERROR_NONE != Status) {
-    Serial.println("start vl53l0x mesurement failed!");
-    VL53L0X.print_pal_error(Status);
+  Status = ranger.VL53L0X_continuous_ranging_init();
+  if (Status != VL53L0X_ERROR_NONE) {
+    Serial.println("Start measurement failed");
+    ranger.print_pal_error(Status);
     presenceError = true;
+  }
+
+  if (!presenceError) {
+    VL53L0X_SetMeasurementTimingBudgetMicroSeconds(ranger.pMyDevice, 80000);
+
+    VL53L0X_SetVcselPulsePeriod(ranger.pMyDevice, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
+    VL53L0X_SetVcselPulsePeriod(ranger.pMyDevice, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
+
+    VL53L0X_StartMeasurement(ranger.pMyDevice);
   }
 }
 
-void loopPresence()
-{
+void loopPresence() {
   // PIR
   if (digitalRead(PIR_PIN)) {
     slogln("PIR MOTION");
@@ -40,28 +44,25 @@ void loopPresence()
   }
 
   // TOF
-  VL53L0X_RangingMeasurementData_t RangingMeasurementData;
-  VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-
-  memset(&RangingMeasurementData, 0, sizeof(VL53L0X_RangingMeasurementData_t));
-  Status = VL53L0X.PerformSingleRangingMeasurement(&RangingMeasurementData);
-  if (VL53L0X_ERROR_NONE == Status) {
-    history[pointer] = RangingMeasurementData.RangeMilliMeter;
-    if (++pointer == HIST) pointer = 0;
-
-    int maxMeasure = 0;
-    for (int i = 0; i < HIST; i++) {
-      maxMeasure = max(maxMeasure, history[i]);
+  VL53L0X_Error Status = VL53L0X_GetMeasurementDataReady(ranger.pMyDevice, &ranger.stat);
+  if (Status != VL53L0X_ERROR_NONE) {
+    Serial.println("Polling failed");
+    ranger.print_pal_error(Status);
+  } else if (ranger.stat == 1) {
+    VL53L0X_RangingMeasurementData_t RangingMeasurementData;
+    Status = ranger.PerformContinuousRangingMeasurement(&RangingMeasurementData);
+    if (VL53L0X_ERROR_NONE == Status) {
+      uint16_t mm = RangingMeasurementData.RangeMilliMeter;
+      if (mm < TOF_DIST_SENSE && mm > TOF_DIST_BLOCK) {
+        slog("TOF MOTION ");
+        slogln(String(mm));
+        broadcastPacket("tof");
+      }
+    } else {
+      Serial.print("Measurement failed");
+      ranger.print_pal_error(Status);
     }
 
-    int measure = maxMeasure;
-    if (measure < TOF_DIST_SENSE && measure > TOF_DIST_BLOCK) {
-      slog("TOF MOTION ");
-      slogln(String(measure));
-      broadcastPacket("tof");
-    }
-  } else {
-    Serial.print("measurement failed !! Status code =");
-    Serial.println(Status);
+    VL53L0X_StartMeasurement(ranger.pMyDevice);
   }
 }
