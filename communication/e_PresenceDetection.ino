@@ -5,8 +5,10 @@ Seeed_vl53l0x ranger;
 #define TOF_DIST_BLOCK 50
 
 #define PIR_PIN 36
+#define PIR_TRIGGER_DELAY 250
 
 bool presenceError = false;
+unsigned long lastPIRTrigger = 0;
 
 void setupPresence() {
   pinMode(PIR_PIN, INPUT);
@@ -16,7 +18,14 @@ void setupPresence() {
   if (Status != VL53L0X_ERROR_NONE) {
     Serial.println("Init vl53l0x failed");
     ranger.print_pal_error(Status);
-    presenceError = true;
+    
+    VL53L0X_ResetDevice(ranger.pMyDevice);
+    Status = ranger.VL53L0X_common_init();
+    if (Status == VL53L0X_ERROR_NONE) {
+      Serial.println("Reset successful");
+    } else {
+      presenceError = true;
+    }
   }
 
   Status = ranger.VL53L0X_continuous_ranging_init();
@@ -37,8 +46,11 @@ void setupPresence() {
 }
 
 void loopPresence() {
+  unsigned long now = millis();
+
   // PIR
-  if (digitalRead(PIR_PIN)) {
+  if (now - lastPIRTrigger > PIR_TRIGGER_DELAY && digitalRead(PIR_PIN)) {
+    lastPIRTrigger = now;
     slogln("PIR MOTION");
     broadcastPacket("pir");
   }

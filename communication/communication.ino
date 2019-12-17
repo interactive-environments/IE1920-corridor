@@ -1,4 +1,4 @@
-#define IS_DEBUG true
+bool IS_DEBUG = true;
 
 void setupComms();
 void loopComms();
@@ -22,13 +22,14 @@ void slogln(String str) {
 }
 
 void setup() {
-  if (IS_DEBUG) {
-    Serial.begin(115200);
-    for (int i = 0; i < 10 && !Serial; i++) {
-      delay(100);
-    }
-    Serial.println("Start");
+  Serial.begin(115200);
+  for (int i = 0; i < 10 && !Serial; i++) {
+    delay(100);
   }
+  if (!Serial) {
+    IS_DEBUG = false;
+  }
+  Serial.println("Start");
 
   setupComms();
   setupPresence();

@@ -5,6 +5,8 @@ class UnitState {
     unsigned long lastTOFTrigger = 0;
     unsigned long lastPIRTrigger = 0;
     unsigned long TOFTriggerDiff = 0;
+    float offset = 0.f;
+    float velocity = 0.f;
     bool isTriggered = false;
 
     bool hasPresence();

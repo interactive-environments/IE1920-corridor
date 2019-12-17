@@ -1,6 +1,6 @@
 #define MAX_UNITS 12
 #define DEFAULT_LASER_TRIGGER_DIFF 1000
-#define CONST_SPEED_FACTOR 0.33
+#define CONST_SPEED_FACTOR 0.4f
 #define FORCE_TIMEOUT_MS 500
 
 class UnitIndexer {
@@ -15,6 +15,15 @@ class UnitIndexer {
 
     int stateIndex(int offset);
 };
+
+float velocityCurve(int timeBetweenTriggers, float entryPosition, float prevVelocity) {
+  // Estimate travel of 1.05 panel, can be tweaked.
+  const float totalDist = 0.55f - entryPosition;
+  const float newVelocity = totalDist / float(max(10, timeBetweenTriggers) / 1000) * 0.75f;
+
+  // Keep 40% of old momentum, can be tweaked.
+  return CONST_SPEED_FACTOR * max(0.f, prevVelocity) + (1.f - CONST_SPEED_FACTOR) * newVelocity;
+}
 
 bool UnitIndexer::handlePacket(int offset, String packet) {
   if (offset < lowestNegative) {
@@ -40,29 +49,39 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
   bool hadPresence = states[index].hasPresence();
 
   if (packet == "tof") {
-    int cameFrom = 0;
-    if (offset > lowestNegative && states[stateIndex(offset - 1)].forceTimeout(FORCE_TIMEOUT_MS)) {
+    int walkDirection = 0;
+    if (offset > lowestNegative && getState(offset - 1)->forceTimeout(FORCE_TIMEOUT_MS)) {
       // Walking forwards.
-      cameFrom = stateIndex(offset - 1);
-    } else if (offset < highestPositive && states[stateIndex(offset + 1)].forceTimeout(FORCE_TIMEOUT_MS)) {
+      walkDirection = 1;
+    } else if (offset < highestPositive && getState(offset + 1)->forceTimeout(FORCE_TIMEOUT_MS)) {
       // Walking backwards.
-      cameFrom = stateIndex(offset + 1);
+      walkDirection = -1;
     }
 
-    /*
-    // Trigger diff determines walking speed based animations.
     int triggerDiff = DEFAULT_LASER_TRIGGER_DIFF;
-    if (cameFrom != 0) {
-      float tofTriggerDiff = millis() - states[cameFrom].lastPIRTrigger;
-      tofTriggerDiff = (1.f - CONST_SPEED_FACTOR) * triggerDiff
-                       + CONST_SPEED_FACTOR * states[cameFrom].TOFTriggerDiff;
-      if (tofTriggerDiff < triggerDiff) {
-        triggerDiff = tofTriggerDiff;
+    if (walkDirection == 0) {
+      states[index].offset = 0.f;
+      states[index].velocity = 0.f;
+    } else {
+      int cameFrom = stateIndex(offset - 1);
+
+      // Trigger diff determines walking speed based animations.
+      if (cameFrom != 0) {
+        float tofTriggerDiff = millis() - states[cameFrom].lastTOFTrigger;
+        if (tofTriggerDiff < triggerDiff) {
+          triggerDiff = tofTriggerDiff;
+        }
+      }
+      
+      states[index].offset = states[cameFrom].offset - float(walkDirection);
+      if (walkDirection == 1) {
+        states[index].velocity = velocityCurve(triggerDiff, states[index].offset, states[cameFrom].velocity);
+      } else {
+        // Invert velocity calculation when going backwards.
+        states[index].velocity = -velocityCurve(triggerDiff, -states[index].offset, -states[cameFrom].velocity);
       }
     }
-    */
-
-    int triggerDiff = DEFAULT_LASER_TRIGGER_DIFF;
+    
     states[index].triggerTOF(triggerDiff);
   } else if (packet == "pir") {
     states[index].triggerPIR();
