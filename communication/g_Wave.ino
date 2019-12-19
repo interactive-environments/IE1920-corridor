@@ -17,7 +17,7 @@ void setupWave() {
     delay(250);
   }
 
-  physical.setTarget(1.f);
+  physical.setTarget(0.f);
   lastFrameMs = millis();
 }
 

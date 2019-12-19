@@ -2,39 +2,38 @@
 //#include <SlowMotionServo.h>
 #include <ChainableLED.h>
 
-#define SERVO_PIN 2
-#define MOSFET_PIN 4
+#define SERVO_PIN 4
+#define MOSFET_PIN 6
 
-ChainableLED leds(25, 26, 1);
+ChainableLED leds(A2, A3, 1);
 
 class PhysicalMovement {
   public:
-    PhysicalMovement();
     void setTarget(float target);
   private:
+    bool initialized = false;
     float mTarget = 0.f;
     Servo mServo;
 };
 
-PhysicalMovement::PhysicalMovement() {
-  //mServo.setInitialPosition(mTarget);
-  //mServo.setMinMax(0, 180);
-  //mServo.setPin(SERVO_PIN);
-  mServo.attach(SERVO_PIN);
-  
-  pinMode(MOSFET_PIN, OUTPUT);
-  leds.init();
-}
-
 /*
- * target [0, 1] as a fraction of how far the panel should open.
- */
+   target [0, 1] as a fraction of how far the panel should open.
+*/
 void PhysicalMovement::setTarget(float target) {
+  if (!initialized) {
+    //mServo.setInitialPosition(mTarget);
+    //mServo.setMinMax(0, 180);
+    //mServo.setPin(SERVO_PIN);
+    mServo.attach(SERVO_PIN);
+
+    pinMode(MOSFET_PIN, OUTPUT);
+    leds.init();
+    initialized = true;
+  }
+
   mTarget = target;
-  //mServo.goTo(int(target * 180.f));
-  //mServo.goTo(0);
-  mServo.write(int(target * 60.f));
-  
+  mServo.write(int(target * 90.f));
+
   // Uncomment line below to use natural exponent.
   //float base = 2.718f;
   float base = 9.f;

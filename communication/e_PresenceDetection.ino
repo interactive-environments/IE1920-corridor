@@ -4,11 +4,16 @@ Seeed_vl53l0x ranger;
 #define TOF_DIST_SENSE 1750
 #define TOF_DIST_BLOCK 50
 
-#define PIR_PIN 36
+#define PIR_PIN A6
 #define PIR_TRIGGER_DELAY 250
 
 bool presenceError = false;
 unsigned long lastPIRTrigger = 0;
+
+bool resetTOF() {
+  VL53L0X_ResetDevice(ranger.pMyDevice);
+  return ranger.VL53L0X_common_init() == VL53L0X_ERROR_NONE;
+}
 
 void setupPresence() {
   pinMode(PIR_PIN, INPUT);
@@ -18,10 +23,7 @@ void setupPresence() {
   if (Status != VL53L0X_ERROR_NONE) {
     Serial.println("Init vl53l0x failed");
     ranger.print_pal_error(Status);
-    
-    VL53L0X_ResetDevice(ranger.pMyDevice);
-    Status = ranger.VL53L0X_common_init();
-    if (Status == VL53L0X_ERROR_NONE) {
+    if (resetTOF()) {
       Serial.println("Reset successful");
     } else {
       presenceError = true;
@@ -60,6 +62,8 @@ void loopPresence() {
   if (Status != VL53L0X_ERROR_NONE) {
     Serial.println("Polling failed");
     ranger.print_pal_error(Status);
+    VL53L0X_ClearInterruptMask(ranger.pMyDevice, 0x18);
+    VL53L0X_StartMeasurement(ranger.pMyDevice);
   } else if (ranger.stat == 1) {
     VL53L0X_RangingMeasurementData_t RangingMeasurementData;
     Status = ranger.PerformContinuousRangingMeasurement(&RangingMeasurementData);
