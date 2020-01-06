@@ -1,5 +1,8 @@
 bool IS_DEBUG = true;
 
+// Headers for methods in other files. The entry point always gets
+// compiled before other files, so we need these to be able to call them.
+
 void setupComms();
 void loopComms();
 
@@ -9,6 +12,8 @@ void loopPresence();
 void setupWave();
 void loopWave();
 
+// Log methods that make it easy to disable all debugging,
+// since Serial.prints are apparently very slow.
 void slog(String str) {
   if (IS_DEBUG) {
     Serial.print(str);
