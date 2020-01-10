@@ -4,7 +4,7 @@
 // it is highly unlikely that there are any frame drops.
 
 #define FRAME_MS 20
-#define EXP_CHANGE_RATE 0.025f
+#define EXP_CHANGE_RATE 0.1f
 
 PhysicalMovement physical;
 float currentOpening = 0.f;
