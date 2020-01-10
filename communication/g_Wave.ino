@@ -4,7 +4,7 @@
 // it is highly unlikely that there are any frame drops.
 
 #define FRAME_MS 20
-#define EXP_CHANGE_RATE 0.95f
+#define EXP_CHANGE_RATE 0.975f
 
 PhysicalMovement physical;
 float currentOpening = 0.f;
@@ -32,13 +32,13 @@ void tickVelocities() {
     UnitState* state = units.getState(i);
     state->offset += state->velocity / float(FRAME_MS);
 
-    // Change the 0.5 to allow the wave to ripple further ahead.
+    // Change the 0.75 to allow the wave to ripple further ahead.
     // Maybe remove this limit altogether and reduce velocity after a
     // certain offset.
     if (state->velocity > 0.f) {
-      state->offset = min(state->offset, 0.5f);
+      state->offset = min(state->offset, 0.75f);
     } else {
-      state->offset = max(state->offset, -0.5f);
+      state->offset = max(state->offset, -0.75f);
     }
   }
 }

@@ -1,6 +1,6 @@
 #define MAX_UNITS 12
 #define DEFAULT_LASER_TRIGGER_DIFF 1000
-#define CONST_SPEED_FACTOR 0.4f
+#define CONST_SPEED_FACTOR 0.3f
 #define FORCE_TIMEOUT_MS 500
 
 /**
@@ -37,11 +37,12 @@ class UnitIndexer {
  * This method can be tweaked in many ways depending on the desired effect.
  */
 float velocityCurve(int timeBetweenTriggers, float entryPosition, float prevVelocity) {
-  // Estimate travel of 1.05 panel, can be tweaked.
+  // Estimate travel of 1.05 panel between two triggers, can be tweaked.
   const float totalDist = 0.55f - entryPosition;
-  const float newVelocity = totalDist / float(max(10, timeBetweenTriggers) / 1000) * 0.75f;
+  const float newVelocity = totalDist / float(max(10, timeBetweenTriggers) / 1000) * 0.95f;
+  // Slightly reduce velocity to let the wave catch up.
 
-  // Keep 40% of old momentum, can be tweaked.
+  // Keep 30% of old momentum, can be tweaked.
   return CONST_SPEED_FACTOR * max(0.f, prevVelocity) + (1.f - CONST_SPEED_FACTOR) * newVelocity;
 }
 
