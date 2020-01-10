@@ -46,7 +46,7 @@ void setupPresence() {
     
     // From testing, it seems that 80 milliseconds is the lower limit for the time needed
     // to not get misdetected triggers.
-    VL53L0X_SetMeasurementTimingBudgetMicroSeconds(ranger.pMyDevice, 80000);
+    VL53L0X_SetMeasurementTimingBudgetMicroSeconds(ranger.pMyDevice, 75000);
 
     // These are the best available settings in the library.
     VL53L0X_SetVcselPulsePeriod(ranger.pMyDevice, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
