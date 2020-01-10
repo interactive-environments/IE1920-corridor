@@ -47,6 +47,11 @@ bool UnitState::hasPresence() {
 }
 
 bool UnitState::forceTimeout(int duration) {
+  if (millis() - lastTOFTrigger < 100) {
+    // Return true without doing anything to prevent constant back and forth
+    // jumping when two are triggered simultaneously.
+    return true;
+  }
   checkTriggeredValid();
   bool wasTriggered = isTriggered;
   isTriggered = false;
