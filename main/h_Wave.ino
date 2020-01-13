@@ -9,6 +9,9 @@ PhysicalMovement physical;
 float currentOpening = 0.f;
 
 unsigned long lastFrameMs = 0;
+unsigned long lastTriggerMs = 0;
+unsigned long idleTrigger = 0;
+
 float lastD = NO_PEAK;
 
 void setupWave() {
@@ -23,6 +26,8 @@ void setupWave() {
 
   physical.setTarget(0.f);
   lastFrameMs = millis();
+
+  randomSeed(analogRead(A2));
 }
 
 void tickVelocities() {
@@ -57,8 +62,33 @@ void tickWave() {
     lastD = d;
   }
 
+  unsigned long now = millis();
+  if (abs(d) < NO_PEAK) {
+    lastTriggerMs = now;
+  }
+
   // Calculate how far this unit should open the panel depending on the nearest peak.
-  float targetOpening = peakNormalizedGaussian(abs(d));
+  float targetOpening;
+  if (now - lastTriggerMs < getConfigi(WAVE_ACTIVE_MS)) {
+    targetOpening = peakNormalizedGaussian(abs(d));
+  } else {
+    // Idle animation code.
+    float idleAnimTime = getConfigi(WAVE_IDLE_ANIM_MS);
+    float idleAnimProgress = (now - idleTrigger) / idleAnimTime;
+
+    if (idleAnimProgress > 1.f) {
+      // Try starting an animation, using randomness.
+      targetOpening = 0.f;
+      long randUpperBound = getConfigi(WAVE_IDLE_ANIM_RARITY);
+      if (random(randUpperBound) == 0) {
+        slogln("<<<<< Random idle trigger >>>>>");
+        idleTrigger = now;
+      }
+    } else {
+      // Is currently running.
+      targetOpening = 0.5f - 0.5f * cos(idleAnimProgress * PI * 2);
+    }
+  }
   
   // Use an exponent to smooth out this calculation in case these is a sudden jump,
   // like on the first panel.

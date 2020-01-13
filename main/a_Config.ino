@@ -16,6 +16,9 @@
 #define PRESENCE_TOF_DIST_BLOCK 8
 #define PEAKS_SIGMA 9
 #define WAVE_EXP_CHANGE_RATE 10
+#define WAVE_ACTIVE_MS 11
+#define WAVE_IDLE_ANIM_MS 12
+#define WAVE_IDLE_ANIM_RARITY 13
 
 float configVal[CONFIG_COUNT];
 
@@ -35,6 +38,9 @@ void setupConfig() {
   configVal[PRESENCE_TOF_DIST_BLOCK] = 50.f;
   configVal[PEAKS_SIGMA] = 1.f;
   configVal[WAVE_EXP_CHANGE_RATE] = 0.1f;
+  configVal[WAVE_ACTIVE_MS] = 1500.f;
+  configVal[WAVE_IDLE_ANIM_MS] = 1000.f;
+  configVal[WAVE_IDLE_ANIM_RARITY] = 400.f;
   
   Wire.begin();
 }
