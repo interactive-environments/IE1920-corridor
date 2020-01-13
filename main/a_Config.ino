@@ -3,6 +3,7 @@
 #define I2C_SERVER_ADDR 18
 #define CONFIG_COUNT 20
 #define INITIAL_WAIT_MICROSECONDS 2500
+#define CHAR_WAIT_MICROSECONDS 500
 
 // Config indices.
 #define UNITSTATE_TIMEOUT_MS 0
@@ -67,6 +68,7 @@ bool setConfigStr(String str) {
     slogln(String(val, 4));
     if (id < CONFIG_COUNT) {
       configVal[id] = val;
+      lastConfigUpdate = millis();
       return true;
     } else {
       slogln("Out of bounds");
@@ -88,6 +90,7 @@ void loopConfig() {
         break;
       }
       str += c;
+      delayMicroseconds(CHAR_WAIT_MICROSECONDS);
       b = Wire.requestFrom(I2C_SERVER_ADDR, 1);
     }
     if (str != "") {
