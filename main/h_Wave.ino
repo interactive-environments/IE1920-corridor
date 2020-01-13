@@ -110,4 +110,11 @@ void loopWave() {
     tickWave();
     lastFrameMs += FRAME_MS;
   }
+
+  if (millis() - lastConfigUpdate < 1000) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(1);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(0);
+  }
 }

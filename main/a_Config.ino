@@ -22,6 +22,7 @@
 #define WAVE_IDLE_ANIM_RARITY 14
 
 float configVal[CONFIG_COUNT];
+unsigned long lastConfigUpdate = 0;
 
 // Broadcast configuration changes over serial.
 void broadcastPacket(String packet);
