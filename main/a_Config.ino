@@ -17,6 +17,9 @@
 
 float configVal[CONFIG_COUNT];
 
+// Broadcast configuration changes over serial.
+void broadcastPacket(String packet);
+
 void setupConfig() {
   // Initialize default values.
   configVal[UNITSTATE_TIMEOUT_MS] = 2500.f;
@@ -30,6 +33,33 @@ void setupConfig() {
   configVal[WAVE_EXP_CHANGE_RATE] = 0.1f;
   
   Wire.begin();
+}
+
+float getConfigf(int index) {
+  return configVal[index];
+}
+
+int getConfigi(int index) {
+  return int(getConfigf(index));
+}
+
+bool setConfigStr(String str) {
+  int sepIndex = str.indexOf('=');
+  if (sepIndex != -1) {
+    int id = str.substring(0, sepIndex).toInt();
+    float val = str.substring(sepIndex + 1, str.length()).toFloat();
+    slog("Setting config ");
+    slog(String(id));
+    slog(" to ");
+    slogln(String(val, 4));
+    if (id < CONFIG_COUNT) {
+      configVal[id] = val;
+      return true;
+    } else {
+      slogln("Out of bounds");
+    }
+  }
+  return false;
 }
 
 void loopConfig() {
@@ -52,28 +82,9 @@ void loopConfig() {
       str.replace("\n", "");
       slog("WIRE: ");
       slogln(str);
-      int sepIndex = str.indexOf('=');
-      if (sepIndex != -1) {
-        int id = str.substring(0, sepIndex).toInt();
-        float val = str.substring(sepIndex + 1, str.length()).toFloat();
-        slog("Setting config ");
-        slog(String(id));
-        slog(" to ");
-        slogln(String(val, 4));
-        if (id < CONFIG_COUNT) {
-          configVal[id] = val;
-        } else {
-          slogln("Out of bounds");
-        }
+      if (setConfigStr(str)) {
+        broadcastPacket("c" + str);
       }
     }
   }
-}
-
-float getConfigf(int index) {
-  return configVal[index];
-}
-
-int getConfigi(int index) {
-  return int(getConfigf(index));
 }

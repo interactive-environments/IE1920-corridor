@@ -117,6 +117,8 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
     states[index].triggerTOF(triggerDiff);
   } else if (packet == "pir") {
     states[index].triggerPIR();
+  } else if (packet.startsWith("c")) {
+    setConfigStr(packet.substring(1));
   }
 
   return true;
