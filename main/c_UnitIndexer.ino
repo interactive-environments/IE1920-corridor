@@ -82,6 +82,12 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
     } else if (offset < highestPositive && getState(offset + 1)->forceTimeout(forceTimeoutMs)) {
       // Walking backwards.
       walkDirection = -1;
+    } else if (offset > lowestNegative + 1 && getState(offset - 2)->forceTimeout(forceTimeoutMs)) {
+      // Walking forwards, missed one trigger.
+      walkDirection = 2;
+    } else if (offset < highestPositive - 1 && getState(offset + 2)->forceTimeout(forceTimeoutMs)) {
+      // Walking backwards, missed one trigger.
+      walkDirection = -2;
     }
 
     int triggerDiff = getConfigi(INDEXER_DEFAULT_LASER_TRIGGER_DIFF);
@@ -93,20 +99,21 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
       states[index].offset = 0.f;
       states[index].velocity = 0.f;
     } else {
-      int cameFrom = stateIndex(offset - 1);
+      int cameFrom = stateIndex(offset - walkDirection);
 
       // Difference in ToF trigger times determines animation speed.
       if (cameFrom != 0) {
         float tofTriggerDiff = millis() - states[cameFrom].lastTOFTrigger;
+        tofTiggerDiff /= float(abs(walkDirection));
         if (tofTriggerDiff < triggerDiff) {
           triggerDiff = tofTriggerDiff;
         }
       }
 
-      // Shift the new wave "position" by 1 or -1, since it is relative to the new panel.
+      // Shift the new wave "position", since it is relative to the new panel.
       // This actually keeps the position constant.
       states[index].offset = states[cameFrom].offset - float(walkDirection);
-      if (walkDirection == 1) {
+      if (walkDirection > 0) {
         states[index].velocity = velocityCurve(triggerDiff, states[index].offset, states[cameFrom].velocity);
       } else {
         // Invert velocity calculation when going backwards.
