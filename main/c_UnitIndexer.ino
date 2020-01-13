@@ -1,7 +1,4 @@
 #define MAX_UNITS 12
-#define DEFAULT_LASER_TRIGGER_DIFF 1000
-#define CONST_SPEED_FACTOR 0.3f
-#define FORCE_TIMEOUT_MS 500
 
 /**
  * Wrapper around an array holding all UnitState instances, for all
@@ -42,8 +39,9 @@ float velocityCurve(int timeBetweenTriggers, float entryPosition, float prevVelo
   const float newVelocity = totalDist / float(max(10, timeBetweenTriggers) / 1000) * 0.95f;
   // Slightly reduce velocity to let the wave catch up.
 
-  // Keep 30% of old momentum, can be tweaked.
-  return CONST_SPEED_FACTOR * max(0.f, prevVelocity) + (1.f - CONST_SPEED_FACTOR) * newVelocity;
+  // Keep part of old momentum, can be tweaked.
+  float constSpeedFactor = getConfigf(INDEXER_CONST_SPEED_FACTOR);
+  return constSpeedFactor * max(0.f, prevVelocity) + (1.f - constSpeedFactor) * newVelocity;
 }
 
 bool UnitIndexer::handlePacket(int offset, String packet) {
@@ -76,16 +74,17 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
     // we do not need synchronization mechanisms.
 
     // Check from which panel we are coming from.
+    int forceTimeoutMs = getConfigi(INDEXER_FORCE_TIMEOUT_MS);
     int walkDirection = 0;
-    if (offset > lowestNegative && getState(offset - 1)->forceTimeout(FORCE_TIMEOUT_MS)) {
+    if (offset > lowestNegative && getState(offset - 1)->forceTimeout(forceTimeoutMs)) {
       // Walking forwards.
       walkDirection = 1;
-    } else if (offset < highestPositive && getState(offset + 1)->forceTimeout(FORCE_TIMEOUT_MS)) {
+    } else if (offset < highestPositive && getState(offset + 1)->forceTimeout(forceTimeoutMs)) {
       // Walking backwards.
       walkDirection = -1;
     }
 
-    int triggerDiff = DEFAULT_LASER_TRIGGER_DIFF;
+    int triggerDiff = getConfigi(INDEXER_DEFAULT_LASER_TRIGGER_DIFF);
     if (walkDirection == 0) {
       // We appeared from nowhere, so this is probably the first or last panel.
       // Make the wave start from the middle without any velocity.

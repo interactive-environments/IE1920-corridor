@@ -1,5 +1,4 @@
 #define NO_PEAK 999999.f
-#define SIGMA 1.f
 
 /**
  * To get a true gaussian with area = 1 we would need to scale by
@@ -22,7 +21,7 @@ float peakNormalizedGaussian(float d, float s) {
  * we can use the method above with the additional parameter s.
  */
 float peakNormalizedGaussian(float d) {
-  return peakNormalizedGaussian(d, SIGMA);
+  return peakNormalizedGaussian(d, getConfigf(PEAKS_SIGMA));
 }
 
 /**

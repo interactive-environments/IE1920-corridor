@@ -1,5 +1,3 @@
-#define TIMEOUT_MS 2500
-
 /**
  * Data-structure holding all variables for one unit in a multi-unit setup.
  * It keeps track of the trigger times of the sensors, and the speed of
@@ -47,7 +45,7 @@ bool UnitState::hasPresence() {
 }
 
 bool UnitState::forceTimeout(int duration) {
-  if (millis() - lastTOFTrigger < 100) {
+  if (millis() - lastTOFTrigger < getConfigi(UNITSTATE_PREVENT_TRIGGER_MS)) {
     // Return true without doing anything to prevent constant back and forth
     // jumping when two are triggered simultaneously.
     return true;
@@ -77,7 +75,7 @@ void UnitState::triggerPIR() {
 }
 
 void UnitState::checkTriggeredValid() {
-  if (millis() - max(lastTOFTrigger, lastPIRTrigger) >= TIMEOUT_MS) {
+  if (millis() - max(lastTOFTrigger, lastPIRTrigger) >= getConfigi(UNITSTATE_TIMEOUT_MS)) {
     isTriggered = false;
   }
 }

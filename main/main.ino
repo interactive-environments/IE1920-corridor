@@ -3,6 +3,9 @@ bool IS_DEBUG = true;
 // Headers for methods in other files. The entry point always gets
 // compiled before other files, so we need these to be able to call them.
 
+void setupConfig();
+void loopConfig();
+
 void setupComms();
 void loopComms();
 
@@ -36,12 +39,14 @@ void setup() {
   }
   Serial.println("Start");
 
+  setupConfig();
   setupComms();
   setupPresence();
   setupWave();
 }
 
 void loop() {
+  loopConfig();
   loopComms();
   loopPresence();
   loopWave();

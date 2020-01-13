@@ -4,7 +4,6 @@
 // it is highly unlikely that there are any frame drops.
 
 #define FRAME_MS 20
-#define EXP_CHANGE_RATE 0.1f
 
 PhysicalMovement physical;
 float currentOpening = 0.f;
@@ -63,7 +62,8 @@ void tickWave() {
   
   // Use an exponent to smooth out this calculation in case these is a sudden jump,
   // like on the first panel.
-  currentOpening = currentOpening * (1.f - EXP_CHANGE_RATE) + targetOpening * EXP_CHANGE_RATE;
+  float expChangeRate = getConfigf(WAVE_EXP_CHANGE_RATE);
+  currentOpening = currentOpening * (1.f - expChangeRate) + targetOpening * expChangeRate;
   physical.setTarget(currentOpening);
 
   // Log presence by enabling the debug LED.

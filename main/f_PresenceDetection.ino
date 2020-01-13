@@ -1,9 +1,6 @@
 #include "Seeed_vl53l0x.h"
 Seeed_vl53l0x ranger;
 
-#define TOF_DIST_SENSE 1750
-#define TOF_DIST_BLOCK 50
-
 #define PIR_PIN A6
 #define PIR_TRIGGER_DELAY 250
 
@@ -84,7 +81,7 @@ void loopPresence() {
     Status = ranger.PerformContinuousRangingMeasurement(&RangingMeasurementData);
     if (VL53L0X_ERROR_NONE == Status) {
       uint16_t mm = RangingMeasurementData.RangeMilliMeter;
-      if (mm < TOF_DIST_SENSE && mm > TOF_DIST_BLOCK) {
+      if (mm < getConfigi(PRESENCE_TOF_DIST_SENSE) && mm > getConfigi(PRESENCE_TOF_DIST_BLOCK)) {
         slog("TOF MOTION ");
         slogln(String(mm));
         broadcastPacket("tof");
