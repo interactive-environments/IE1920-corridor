@@ -37,12 +37,16 @@ void setup() {
   if (!Serial) {
     IS_DEBUG = false;
   }
-  Serial.println("Start");
+  slogln("Start");
 
   setupConfig();
+  slogln("1");
   setupComms();
+  slogln("2");
   setupPresence();
+  slogln("3");
   setupWave();
+  slogln("4");
 }
 
 int writtenDots = 0;
@@ -50,11 +54,8 @@ int writtenDots = 0;
 void loop() {
   slog(".");
   loopConfig();
-  slog(",");
   loopComms();
-  slog(":");
   loopPresence();
-  slog(";");
   loopWave();
 
   if (writtenDots++ > 32) {

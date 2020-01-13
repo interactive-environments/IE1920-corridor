@@ -27,7 +27,7 @@ void setupWave() {
   physical.setTarget(0.f);
   lastFrameMs = millis();
 
-  randomSeed(analogRead(A2));
+  randomSeed((analogRead(A0) << 10) + analogRead(A4));
 }
 
 void tickVelocities() {
@@ -36,13 +36,11 @@ void tickVelocities() {
     UnitState* state = units.getState(i);
     state->offset += state->velocity / float(FRAME_MS);
 
-    // Change the 0.75 to allow the wave to ripple further ahead.
-    // Maybe remove this limit altogether and reduce velocity after a
-    // certain offset.
+    float rippleAhead = getConfigf(WAVE_RIPPLE_AHEAD);
     if (state->velocity > 0.f) {
-      state->offset = min(state->offset, 0.75f);
+      state->offset = min(state->offset, rippleAhead);
     } else {
-      state->offset = max(state->offset, -0.75f);
+      state->offset = max(state->offset, -rippleAhead);
     }
   }
 }
