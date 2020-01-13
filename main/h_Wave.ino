@@ -27,7 +27,7 @@ void setupWave() {
   physical.setTarget(0.f);
   lastFrameMs = millis();
 
-  randomSeed((analogRead(A0) << 10) + analogRead(A4));
+  randomSeed((analogRead(A0) << 20) + (analogRead(A4) << 10) + analogRead(A5));
 }
 
 void tickVelocities() {
