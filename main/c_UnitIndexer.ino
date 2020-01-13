@@ -1,4 +1,4 @@
-#define MAX_UNITS 12
+#define MAX_UNITS 16
 
 /**
  * Wrapper around an array holding all UnitState instances, for all
