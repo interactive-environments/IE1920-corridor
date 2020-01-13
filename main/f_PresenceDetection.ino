@@ -58,7 +58,7 @@ void loopPresence() {
   unsigned long now = millis();
 
   // PIR
-  if (now - lastPIRTrigger > PIR_TRIGGER_DELAY && digitalRead(PIR_PIN)) {
+  if (getConfigi(PRESENCE_PIR_ENABLED) == 1 && now - lastPIRTrigger > PIR_TRIGGER_DELAY && digitalRead(PIR_PIN)) {
     // Keep track of the last trigger detection, so we do not spam the communication channels
     // with PIR trigger messages. The PIR stays HIGH for a full second after seeing motion.
     lastPIRTrigger = now;

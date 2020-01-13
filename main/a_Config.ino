@@ -14,11 +14,12 @@
 #define INDEXER_VELOCITY_MULT 6
 #define PRESENCE_TOF_DIST_SENSE 7
 #define PRESENCE_TOF_DIST_BLOCK 8
-#define PEAKS_SIGMA 9
-#define WAVE_EXP_CHANGE_RATE 10
-#define WAVE_ACTIVE_MS 11
-#define WAVE_IDLE_ANIM_MS 12
-#define WAVE_IDLE_ANIM_RARITY 13
+#define PRESENCE_PIR_ENABLED 9
+#define PEAKS_SIGMA 10
+#define WAVE_EXP_CHANGE_RATE 11
+#define WAVE_ACTIVE_MS 12
+#define WAVE_IDLE_ANIM_MS 13
+#define WAVE_IDLE_ANIM_RARITY 14
 
 float configVal[CONFIG_COUNT];
 
@@ -36,6 +37,7 @@ void setupConfig() {
   configVal[INDEXER_VELOCITY_MULT] = 0.95f;
   configVal[PRESENCE_TOF_DIST_SENSE] = 1750.f;
   configVal[PRESENCE_TOF_DIST_BLOCK] = 50.f;
+  configVal[PRESENCE_PIR_ENABLED] = 0.f;
   configVal[PEAKS_SIGMA] = 1.f;
   configVal[WAVE_EXP_CHANGE_RATE] = 0.1f;
   configVal[WAVE_ACTIVE_MS] = 1500.f;
