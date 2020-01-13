@@ -2,7 +2,7 @@
 
 #define I2C_SERVER_ADDR 18
 #define CONFIG_COUNT 20
-#define CHAR_WAIT_MICROSECONDS 1500
+#define INITIAL_WAIT_MICROSECONDS 2500
 
 // Config indices.
 #define UNITSTATE_TIMEOUT_MS 0
@@ -76,18 +76,18 @@ bool setConfigStr(String str) {
 
 void loopConfig() {
   // Start receiving
-  Wire.requestFrom(I2C_SERVER_ADDR, 1);
-  delayMicroseconds(CHAR_WAIT_MICROSECONDS);
-  if (Wire.available()) {
+  delayMicroseconds(INITIAL_WAIT_MICROSECONDS);
+  int b = Wire.requestFrom(I2C_SERVER_ADDR, 1);
+  if (b > 0) {
     String str = "";
-    while (Wire.available()) {
+    while (b > 0) {
+      slog("$");
       char c = Wire.read(); // receive a byte as character
       if (c == (char) 0) {
         break;
       }
       str += c;
-      Wire.requestFrom(I2C_SERVER_ADDR, 1);
-      delayMicroseconds(CHAR_WAIT_MICROSECONDS);
+      b = Wire.requestFrom(I2C_SERVER_ADDR, 1);
     }
     if (str != "") {
       str.replace("\r", "");
