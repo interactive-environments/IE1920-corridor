@@ -35,8 +35,9 @@ class UnitIndexer {
  */
 float velocityCurve(int timeBetweenTriggers, float entryPosition, float prevVelocity) {
   // Estimate travel of 1.05 panel between two triggers, can be tweaked.
-  const float totalDist = 0.55f - entryPosition;
-  const float newVelocity = totalDist / float(max(10, timeBetweenTriggers) / 1000) * 0.95f;
+  const float totalDist = 0.5f + getConfigf(INDEXER_ADD_DIST) - entryPosition;
+  const float newVelocity = totalDist / float(max(10, timeBetweenTriggers) / 1000)
+    * getConfigf(INDEXER_VELOCITY_MULT);
   // Slightly reduce velocity to let the wave catch up.
 
   // Keep part of old momentum, can be tweaked.
@@ -104,7 +105,7 @@ bool UnitIndexer::handlePacket(int offset, String packet) {
       // Difference in ToF trigger times determines animation speed.
       if (cameFrom != 0) {
         float tofTriggerDiff = millis() - states[cameFrom].lastTOFTrigger;
-        tofTiggerDiff /= float(abs(walkDirection));
+        tofTriggerDiff /= float(abs(walkDirection));
         if (tofTriggerDiff < triggerDiff) {
           triggerDiff = tofTriggerDiff;
         }
