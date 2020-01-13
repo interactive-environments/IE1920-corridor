@@ -45,9 +45,20 @@ void setup() {
   setupWave();
 }
 
+int writtenDots = 0;
+
 void loop() {
+  slog(".");
   loopConfig();
+  slog(",");
   loopComms();
+  slog(":");
   loopPresence();
+  slog(";");
   loopWave();
+
+  if (writtenDots++ > 32) {
+    writtenDots = 0;
+    slogln("");
+  }
 }
