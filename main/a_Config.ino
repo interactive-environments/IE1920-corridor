@@ -13,15 +13,16 @@
 #define INDEXER_FORCE_TIMEOUT_MS 4
 #define INDEXER_ADD_DIST 5
 #define INDEXER_VELOCITY_MULT 6
-#define PRESENCE_TOF_DIST_SENSE 7
-#define PRESENCE_TOF_DIST_BLOCK 8
-#define PRESENCE_PIR_ENABLED 9
-#define PEAKS_SIGMA 10
-#define WAVE_EXP_CHANGE_RATE 11
-#define WAVE_ACTIVE_MS 12
-#define WAVE_IDLE_ANIM_MS 13
-#define WAVE_IDLE_ANIM_RARITY 14
-#define WAVE_RIPPLE_AHEAD 15
+#define COMMS_REDUNDANCY 7
+#define PRESENCE_TOF_DIST_SENSE 8
+#define PRESENCE_TOF_DIST_BLOCK 9
+#define PRESENCE_PIR_ENABLED 10
+#define PEAKS_SIGMA 11
+#define WAVE_EXP_CHANGE_RATE 12
+#define WAVE_ACTIVE_MS 13
+#define WAVE_IDLE_ANIM_MS 14
+#define WAVE_IDLE_ANIM_RARITY 15
+#define WAVE_RIPPLE_AHEAD 16
 
 float configVal[CONFIG_COUNT];
 unsigned long lastConfigUpdate = 0;
@@ -38,12 +39,13 @@ void setupConfig() {
   configVal[INDEXER_FORCE_TIMEOUT_MS] = 250.f;
   configVal[INDEXER_ADD_DIST] = 0.05f;
   configVal[INDEXER_VELOCITY_MULT] = 0.95f;
+  configVal[COMMS_REDUNDANCY] = 3.f;
   configVal[PRESENCE_TOF_DIST_SENSE] = 1750.f;
   configVal[PRESENCE_TOF_DIST_BLOCK] = 50.f;
   configVal[PRESENCE_PIR_ENABLED] = 0.f;
   configVal[PEAKS_SIGMA] = 1.f;
   configVal[WAVE_EXP_CHANGE_RATE] = 0.035f;
-  configVal[WAVE_ACTIVE_MS] = 5000.f;
+  configVal[WAVE_ACTIVE_MS] = 30000.f;
   configVal[WAVE_IDLE_ANIM_MS] = 6000.f;
   configVal[WAVE_IDLE_ANIM_RARITY] = 400.f;
   configVal[WAVE_RIPPLE_AHEAD] = 1.5f;

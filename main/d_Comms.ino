@@ -1,7 +1,7 @@
 #define RATE 115200
 
 #define MAX_PACKET_LENGTH 12
-#define REDUNDANCY 3
+#define MAX_RECV_LENGTH 64
 
 UnitIndexer units;
 
@@ -34,7 +34,8 @@ void setupComms() {
  * arriving properly.
  */
 void sendRedundantPacket(int line, int fromOffset, String packet) {
-  for (int i = 0; i < REDUNDANCY; i++) {
+  int redundancy = getConfigi(COMMS_REDUNDANCY);
+  for (int i = 0; i < redundancy; i++) {
     sendPacket(line, fromOffset, packet);
   }
 }
@@ -59,10 +60,8 @@ void sendPacket(int line, int fromOffset, String packet) {
 void broadcastPacket(String packet) {
   // Handle the packet ourselves first.
   units.handlePacket(0, packet);
-  sendPacket(1, -1, packet); // To Right
-  sendPacket(0, 1, packet); // To Left
-  //sendRedundantPacket(1, -1, packet); // To Right
-  //sendRedundantPacket(0, 1, packet); // To Left
+  sendRedundantPacket(1, -1, packet); // To Right
+  sendRedundantPacket(0, 1, packet); // To Left
 }
 
 void packetReceived(int i) {
@@ -97,7 +96,8 @@ void packetReceived(int i) {
 void loopComms() {
   String packet;
   for (int i = 0; i < 2; i++) {
-    while (Conn[i]->available()) {
+    int j = 0;
+    while (Conn[i]->available() && j++ < MAX_RECV_LENGTH) {
       byte b = Conn[i]->read();
       switch (b) {
         case '\r': // Skip carriage return
