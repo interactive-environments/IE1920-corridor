@@ -36,12 +36,12 @@ float UnitState::getPresenceWeight() {
   int maxWeightMs = getConfigi(UNITSTATE_MAX_WEIGHT_MS);
   int minWeightMs = getConfigi(UNITSTATE_MIN_WEIGHT_MS);
   
-  int timeSinceTrigger = millis() - lastTOFTrigger;
+  int timeSinceTrigger = millis() - getTriggerTime();
   float periodsSinceTrigger = float(timeSinceTrigger - maxWeightMs) / float(minWeightMs - maxWeightMs);
   periodsSinceTrigger = max(0.f, min(1.f, periodsSinceTrigger));
   
-  int maxWeight = getConfigi(UNITSTATE_MAX_WEIGHT);
-  int minWeight = getConfigi(UNITSTATE_MIN_WEIGHT);
+  float maxWeight = getConfigf(UNITSTATE_MAX_WEIGHT);
+  float minWeight = getConfigf(UNITSTATE_MIN_WEIGHT);
   
-  return minWeight + (maxWeight - minWeight) * periodsSinceTrigger;
+  return minWeight + (maxWeight - minWeight) * (1.f - periodsSinceTrigger);
 }

@@ -7,10 +7,12 @@
 
 PhysicalMovement physical;
 
+// TO REMOVE
+float currentOpening = 0.f;
+
 unsigned long lastFrameMs = 0;
 unsigned long idleTrigger = 0;
 
-float currentOpening = 0.f;
 float lastD = NO_PEAK;
 
 void setupWave() {
@@ -40,13 +42,34 @@ void tickVelocities() {
 void tickWave() {
   tickVelocities();
 
-  float d = nearestPeak();
-  if (IS_DEBUG) {
-    if (lastD != d) {
-      slog(d == NO_PEAK ? "NO PEAK " : "Nearest peak = ");
-      slogln(String(d));
+  // Handle panel rotation.
+  float targetOpening = 0.f;
+
+  // Just for logging.
+  float targetOffset = NO_PEAK;
+
+  /**
+   * Looks at all the units in the system and tries to find the unit with the
+   * wave peak that is closest by.
+   */
+  PresenceState ps;
+  ps.calculate();
+  for (int i = 0; i < ps.getPresenceCount(); i++) {
+    Presence* p = ps.getPresence(i);
+    float offset = getConfigf(WAVE_ASYM_OFFSET);
+    float opening = peakNormalizedGaussian(abs(p->pos + offset), max(1.f, p->weight));
+    if (opening > targetOpening) {
+      targetOpening = opening;
+      targetOffset = offset;
     }
-    lastD = d;
+  }
+  
+  if (IS_DEBUG) {
+    if (lastD != targetOffset) {
+      Serial.print(targetOffset == NO_PEAK ? "NO PEAK " : "Nearest peak = ");
+      Serial.println(String(targetOffset));
+    }
+    lastD = targetOffset;
   }
 
   // Calculate how far this unit should open the panel depending on the nearest peak.
@@ -58,11 +81,8 @@ void tickWave() {
     }
   }
   
-  float targetOpening;
   unsigned long now = millis();
-  if (now - lastTriggerMs < getConfigi(WAVE_ACTIVE_MS)) {
-    targetOpening = peakNormalizedGaussian(abs(d));
-  } else {
+  if (now - lastTriggerMs > getConfigi(WAVE_ACTIVE_MS)) {
     // Idle animation code.
     float idleAnimTime = getConfigi(WAVE_IDLE_ANIM_MS);
     float idleAnimProgress = (now - idleTrigger) / idleAnimTime;
@@ -86,6 +106,8 @@ void tickWave() {
   float expChangeRate = getConfigf(WAVE_EXP_CHANGE_RATE);
   currentOpening = currentOpening * (1.f - expChangeRate) + targetOpening * expChangeRate;
   physical.setTarget(currentOpening);
+
+  slogln(String(currentOpening));
 
   // Log presence by enabling the debug LED.
   digitalWrite(LED_BUILTIN, units.getState(0)->hasPresence() ? HIGH : LOW);

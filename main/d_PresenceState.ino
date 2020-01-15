@@ -59,6 +59,7 @@ void PresenceState::calculate() {
       break;
     } else {
       // Collect all that belong in this group.
+      isProcessed[latestTriggerIndex + CHECK_NEIGHBOURS] = true;
       float weight = units.getState(latestTriggerIndex)->getPresenceWeight();
       float totalWeight = weight;
       float totalPosition = weight * float(latestTriggerIndex);
@@ -69,7 +70,7 @@ void PresenceState::calculate() {
         for (int i = latestTriggerIndex + dir;
             i >= -CHECK_NEIGHBOURS && i <= CHECK_NEIGHBOURS && !isProcessed[i + CHECK_NEIGHBOURS];
             i += dir) {
-          isProcessed[i + CHECK_NEIGHBOURS] = true;      
+          isProcessed[i + CHECK_NEIGHBOURS] = true;
           UnitState* state = units.getState(i);
           if (state->hasPresence()) {
             skippedLast = false;

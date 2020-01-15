@@ -23,21 +23,3 @@ float peakNormalizedGaussian(float d, float s) {
 float peakNormalizedGaussian(float d) {
   return peakNormalizedGaussian(d, getConfigf(PEAKS_SIGMA));
 }
-
-/**
- * Looks at all the units in the system and tries to find the unit with the
- * wave peak that is closest by. This should be extended to prioritize larger
- * waves. If there is no peak at all, a very large distance is returned (NO_PEAK).
- */
-float nearestPeak() {
-  float nearestPeak = NO_PEAK;
-  PresenceState ps;
-  ps.calculate();
-  for (int i = 0; i < ps.getPresenceCount(); i++) {
-    Presence* p = ps.getPresence(i);
-    if (abs(p->pos) < abs(nearestPeak)) {
-      nearestPeak = p->pos;
-    }
-  }
-  return nearestPeak;
-}

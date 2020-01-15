@@ -20,6 +20,7 @@
 #define WAVE_ACTIVE_MS 13
 #define WAVE_IDLE_ANIM_MS 14
 #define WAVE_IDLE_ANIM_RARITY 15
+#define WAVE_ASYM_OFFSET 16
 
 float configVal[CONFIG_COUNT];
 unsigned long lastConfigUpdate = 0;
@@ -39,10 +40,11 @@ void setupConfig() {
   configVal[PRESENCE_TOF_DIST_BLOCK] = 50.f;
   configVal[PRESENCE_PIR_ENABLED] = 0.f;
   configVal[PEAKS_SIGMA] = 1.f;
-  configVal[WAVE_EXP_CHANGE_RATE] = 0.035f;
+  configVal[WAVE_EXP_CHANGE_RATE] = 0.1f;
   configVal[WAVE_ACTIVE_MS] = 30000.f;
   configVal[WAVE_IDLE_ANIM_MS] = 6000.f;
   configVal[WAVE_IDLE_ANIM_RARITY] = 400.f;
+  configVal[WAVE_ASYM_OFFSET] = 0.f;
   
   Wire.begin();
 }
