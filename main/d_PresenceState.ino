@@ -38,10 +38,17 @@ void PresenceState::calculate() {
   for (int i = -CHECK_NEIGHBOURS; i <= CHECK_NEIGHBOURS; i++) {
     isProcessed[i + CHECK_NEIGHBOURS] = i < units.lowestNegative || i > units.highestPositive;
   }
+  /*
+  for (int i = -units.lowestNegative; i <= units.highestPositive; i++) {
+    Serial.print(i);
+    Serial.print(" = ");
+    Serial.println(units.getState(i)->hasPresence());
+  }
+  */
 
   while (true) {
     // Check where to start the next group.
-    int latestTriggerIndex = -1;
+    int latestTriggerIndex;
     unsigned long latestTriggerTime = 0;
     for (int i = -CHECK_NEIGHBOURS; i <= CHECK_NEIGHBOURS; i++) {
       // Ignore units that do not identify as triggered.
@@ -54,10 +61,7 @@ void PresenceState::calculate() {
       }
     }
 
-    if (latestTriggerIndex == -1) {
-      // No more groups left.
-      break;
-    } else {
+    if (latestTriggerTime > 0) {
       // Collect all that belong in this group.
       isProcessed[latestTriggerIndex + CHECK_NEIGHBOURS] = true;
       float weight = units.getState(latestTriggerIndex)->getPresenceWeight();
@@ -88,6 +92,8 @@ void PresenceState::calculate() {
       }
 
       addPresence(totalPosition / totalWeight, totalWeight);
+    } else {
+      break;
     }
   }
 }

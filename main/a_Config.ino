@@ -29,6 +29,7 @@
 #define WAVE_SLOW_DOWN_ACC 23
 #define WAVE_SHOW_DIRECT_PRESENCE 24
 #define WAVE_SIGMA_CHANGE_SPEED 24
+#define WAVE_COLLIDE_REMOVE 25
 
 float configVal[CONFIG_COUNT];
 unsigned long lastConfigUpdate = 0;
@@ -61,6 +62,7 @@ void setupConfig() {
   configVal[WAVE_SLOW_DOWN_ACC] = 4.f;
   configVal[WAVE_SHOW_DIRECT_PRESENCE] = 0.f;
   configVal[WAVE_SIGMA_CHANGE_SPEED] = 1.f;
+  configVal[WAVE_COLLIDE_REMOVE] = 0.1f;
   
   Wire.begin();
 }

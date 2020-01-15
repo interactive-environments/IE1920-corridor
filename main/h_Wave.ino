@@ -79,7 +79,6 @@ void tickWave() {
   }
   Serial.println("");
 
-  /*
   // REMOVE FROM PRODUCTION CODE
   Serial.print("P");
   Serial.print(String(ps.getPresenceCount()));
@@ -102,7 +101,6 @@ void tickWave() {
     }
   }
   Serial.println("");
-  */
   
   if (IS_DEBUG) {
     if (lastD != targetPos) {
@@ -114,7 +112,6 @@ void tickWave() {
     lastD = targetPos;
   }
 
-  // Calculate how far this unit should open the panel depending on the nearest peak.
   unsigned long lastTriggerMs = 0;
   for (int d = units.lowestNegative; d <= units.highestPositive; d++) {
     UnitState* state = units.getState(d);

@@ -25,12 +25,25 @@ class WavePhysics {
     void addWave(Presence* presence);
     void updateWave(Wave* wave, Presence* presence);
     void removeWave(int index);
+    void mergeWaves(int i, int j);
 };
 
 void WavePhysics::tick(PresenceState* ps, int frametimems) {
   bool waveFoundForPresence[MAX_PRESENCES];
   for (int i = 0; i < MAX_PRESENCES; i++) {
     waveFoundForPresence[i] = false;
+  }
+
+  // Remove colliding waves.
+  for (int i = getWaveCount() - 1; i >= 0; i--) {
+    float pos = getWave(i)->pos;
+    for (int j = 0; j < i - 1; j++) {
+      if (abs(pos - getWave(j)->pos) < getConfigf(WAVE_COLLIDE_REMOVE)) {
+        mergeWaves(i, j);
+        removeWave(i);
+        break;
+      }
+    }
   }
     
   // Try to match each wave to a presence.
@@ -157,4 +170,17 @@ void WavePhysics::removeWave(int index) {
     waves[i] = waves[i - 1];
   }
   waveCount--;
+}
+
+// Merge into j.
+void WavePhysics::mergeWaves(int i, int j) {
+  Wave* wi = getWave(i);
+  Wave* wj = getWave(j);
+  wj->lastUpdate = max(wi->lastUpdate, wj->lastUpdate);
+  wj->pos = (wi->pos + wj->pos) / 2.f;
+  wj->targetPos = (wi->targetPos + wj->targetPos) / 2.f;
+  wj->velocity = (wi->velocity + wj->velocity) / 2.f;
+  wj->sigma = (wi->sigma + wj->sigma) / 2.f;
+  wj->targetSigma = (wi->targetSigma + wj->targetSigma) / 2.f;
+  wj->amplitude = max(wi->amplitude, wj->amplitude);
 }
