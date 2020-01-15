@@ -28,6 +28,7 @@
 #define WAVE_SLOW_DOWN_DIST 22
 #define WAVE_SLOW_DOWN_ACC 23
 #define WAVE_SHOW_DIRECT_PRESENCE 24
+#define WAVE_SIGMA_CHANGE_SPEED 24
 
 float configVal[CONFIG_COUNT];
 unsigned long lastConfigUpdate = 0;
@@ -49,7 +50,7 @@ void setupConfig() {
   configVal[PEAKS_SIGMA] = 1.f;
   configVal[WAVE_ACTIVE_MS] = 30000.f;
   configVal[WAVE_IDLE_ANIM_MS] = 6000.f;
-  configVal[WAVE_IDLE_ANIM_RARITY] = 400.f;
+  configVal[WAVE_IDLE_ANIM_RARITY] = 1500.f;
   configVal[WAVE_ASYM_OFFSET] = 0.f;
   configVal[PHYSICS_MAX_DIST] = 3.f;
   configVal[PHYSICS_WAVE_TIMEOUT_MS] = 1500.f;
@@ -59,6 +60,7 @@ void setupConfig() {
   configVal[WAVE_SLOW_DOWN_DIST] = 0.01f;
   configVal[WAVE_SLOW_DOWN_ACC] = 4.f;
   configVal[WAVE_SHOW_DIRECT_PRESENCE] = 0.f;
+  configVal[WAVE_SIGMA_CHANGE_SPEED] = 1.f;
   
   Wire.begin();
 }

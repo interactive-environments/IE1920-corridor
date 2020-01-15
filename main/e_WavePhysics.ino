@@ -6,6 +6,7 @@ struct Wave {
   float targetPos;
   float velocity;
   float sigma;
+  float targetSigma;
   float amplitude;
 };
 
@@ -111,6 +112,12 @@ void WavePhysics::tickPhysicsCalc(float frametime, Wave* wave) {
       wave->velocity = 0.f;
     }
   }
+
+  if (wave->targetSigma > wave->sigma) {
+    wave->sigma = min(wave->sigma + getConfigf(WAVE_SIGMA_CHANGE_SPEED), wave->targetSigma);
+  } else if (wave->targetSigma < wave->sigma) {
+    wave->sigma = max(wave->sigma - getConfigf(WAVE_SIGMA_CHANGE_SPEED), wave->targetSigma);
+  }
 }
 
 void WavePhysics::addWave(Presence* presence) {
@@ -120,12 +127,14 @@ void WavePhysics::addWave(Presence* presence) {
   wave->targetPos = presence->pos + getConfigf(WAVE_ASYM_OFFSET);
   wave->velocity = 0.f;
   wave->sigma = presence->weight;
+  wave->targetSigma = presence->weight;
   wave->amplitude = 0.f;
 }
 
 void WavePhysics::updateWave(Wave* wave, Presence* presence) {
   wave->lastUpdate = millis();
   wave->targetPos = presence->pos + getConfigf(WAVE_ASYM_OFFSET);
+  wave->targetSigma = presence->weight;
 }
 
 // Removes a wave that does not have a presence associated anymore.
