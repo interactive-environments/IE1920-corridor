@@ -23,9 +23,9 @@
 #define PHYSICS_MAX_DIST 17
 #define PHYSICS_WAVE_TIMEOUT_MS 18
 #define PHYSICS_AMPLITUDE_SPEED 19
-#define WAVE_SPEED_UP_DIST 20
+#define WAVE_CATCH_UP_MAX_TIME 20
 #define WAVE_SPEED_UP_ACC 21
-#define WAVE_SLOW_DOWN_DIST 22
+#define WAVE_CATCH_UP_MIN_TIME 22
 #define WAVE_SLOW_DOWN_ACC 23
 #define WAVE_SHOW_DIRECT_PRESENCE 24
 #define WAVE_SIGMA_CHANGE_SPEED 24
@@ -55,9 +55,9 @@ void setupConfig() {
   configVal[PHYSICS_MAX_DIST] = 3.f;
   configVal[PHYSICS_WAVE_TIMEOUT_MS] = 1500.f;
   configVal[PHYSICS_AMPLITUDE_SPEED] = 2.f;
-  configVal[WAVE_SPEED_UP_DIST] = 0.5f;
+  configVal[WAVE_CATCH_UP_MAX_TIME] = 0.25f;
   configVal[WAVE_SPEED_UP_ACC] = 5.f;
-  configVal[WAVE_SLOW_DOWN_DIST] = 0.01f;
+  configVal[WAVE_CATCH_UP_MIN_TIME] = 1.f;
   configVal[WAVE_SLOW_DOWN_ACC] = 4.f;
   configVal[WAVE_SHOW_DIRECT_PRESENCE] = 0.f;
   configVal[WAVE_SIGMA_CHANGE_SPEED] = 1.f;

@@ -65,18 +65,21 @@ void tickWave() {
       targetOpening = opening;
       targetPos = pos;
     }
-    Serial.print(" {");
-    Serial.print(String(pos));
-    Serial.print("|");
+    Serial.print(" {pos=");
+    Serial.print(String(wave->pos));
+    Serial.print("|s=");
     Serial.print(String(wave->sigma));
-    Serial.print("|");
+    Serial.print("|a=");
     Serial.print(String(wave->amplitude));
-    Serial.print("|");
+    Serial.print("|v=");
+    Serial.print(String(wave->velocity));
+    Serial.print("|o=");
     Serial.print(String(opening));
     Serial.print("} ");
   }
   Serial.println("");
 
+  /*
   // REMOVE FROM PRODUCTION CODE
   Serial.print("P");
   Serial.print(String(ps.getPresenceCount()));
@@ -91,16 +94,15 @@ void tickWave() {
       //  targetOpening = opening;
       //  targetPos = pos;
       //}
-      Serial.print(" {");
-      Serial.print(String(pos));
-      Serial.print("|");
+      Serial.print(" {p=");
+      Serial.print(String(p->pos));
+      Serial.print("|w=");
       Serial.print(String(p->weight));
-      Serial.print("|");
-      Serial.print(String(opening));
       Serial.print("} ");
     }
   }
   Serial.println("");
+  */
   
   if (IS_DEBUG) {
     if (lastD != targetPos) {

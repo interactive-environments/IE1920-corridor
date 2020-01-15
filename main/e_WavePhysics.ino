@@ -102,17 +102,30 @@ void WavePhysics::tickPhysics(float frametime) {
 void WavePhysics::tickPhysicsCalc(float frametime, Wave* wave) {
   wave->pos += wave->velocity * frametime;
   float posOffset = wave->targetPos - wave->pos;
+  float catchUpMaxTime = getConfigf(WAVE_CATCH_UP_MAX_TIME);
+  float catchUpMinTime = getConfigf(WAVE_CATCH_UP_MIN_TIME);
+  
   float dir = posOffset >= 0.f ? 1.f : -1.f;
-  if (abs(posOffset) > getConfigf(WAVE_SPEED_UP_DIST)) {
-    wave->velocity += dir * getConfigf(WAVE_SPEED_UP_ACC) * frametime;
-  } else if (abs(posOffset) < getConfigf(WAVE_SLOW_DOWN_DIST)) {
+  if (wave->velocity * catchUpMinTime > posOffset) {
+    // Will overshoot after a while, so decrease speed.
     wave->velocity -= dir * getConfigf(WAVE_SLOW_DOWN_ACC) * frametime;
-    // If we are going into the wrong direction after slowing down, set to zero.
-    if (wave->velocity * dir <= 0.f) {
-      wave->velocity = 0.f;
+
+    // We might be going too slow now, so have a limit.
+    float bestVelocity = posOffset / catchUpMinTime;
+    if (posOffset >= 0.f) {
+      if (wave->velocity < bestVelocity) {
+        // Going too slow towards the right.
+        wave->velocity = bestVelocity;
+      }
+    } else if (wave->velocity > bestVelocity) {
+      wave->velocity = bestVelocity;
     }
+  } else if (wave->velocity * catchUpMaxTime < posOffset) {
+    // Will not catch up within allocated time, so increase speed.
+    wave->velocity += dir * getConfigf(WAVE_SPEED_UP_ACC) * frametime;
   }
 
+  // Smoothly update sigmas.
   if (wave->targetSigma > wave->sigma) {
     wave->sigma = min(wave->sigma + getConfigf(WAVE_SIGMA_CHANGE_SPEED), wave->targetSigma);
   } else if (wave->targetSigma < wave->sigma) {
