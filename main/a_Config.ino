@@ -7,12 +7,10 @@
 
 // Config indices.
 #define UNITSTATE_TIMEOUT_MS 0
-#define UNITSTATE_PREVENT_TRIGGER_MS 1
-#define INDEXER_DEFAULT_LASER_TRIGGER_DIFF 2
-#define INDEXER_CONST_SPEED_FACTOR 3
-#define INDEXER_FORCE_TIMEOUT_MS 4
-#define INDEXER_ADD_DIST 5
-#define INDEXER_VELOCITY_MULT 6
+#define UNITSTATE_MAX_WEIGHT_MS 1
+#define UNITSTATE_MIN_WEIGHT_MS 2
+#define UNITSTATE_MAX_WEIGHT 3
+#define UNITSTATE_MIN_WEIGHT 4
 #define COMMS_REDUNDANCY 7
 #define PRESENCE_TOF_DIST_SENSE 8
 #define PRESENCE_TOF_DIST_BLOCK 9
@@ -22,13 +20,6 @@
 #define WAVE_ACTIVE_MS 13
 #define WAVE_IDLE_ANIM_MS 14
 #define WAVE_IDLE_ANIM_RARITY 15
-#define WAVE_RIPPLE_AHEAD 16
-
-#define UNITSTATE_MAX_WEIGHT_MS 17
-#define UNITSTATE_MIN_WEIGHT_MS 18
-#define UNITSTATE_MAX_WEIGHT 19
-#define UNITSTATE_MIN_WEIGHT 20
-#define PRESENCESTATE_SPLIT_MS 21
 
 float configVal[CONFIG_COUNT];
 unsigned long lastConfigUpdate = 0;
@@ -39,12 +30,10 @@ void broadcastPacket(String packet);
 void setupConfig() {
   // Initialize default values.
   configVal[UNITSTATE_TIMEOUT_MS] = 2500.f;
-  configVal[UNITSTATE_PREVENT_TRIGGER_MS] = 100.f;
-  configVal[INDEXER_DEFAULT_LASER_TRIGGER_DIFF] = 1000.f;
-  configVal[INDEXER_CONST_SPEED_FACTOR] = 0.3f;
-  configVal[INDEXER_FORCE_TIMEOUT_MS] = 250.f;
-  configVal[INDEXER_ADD_DIST] = 0.05f;
-  configVal[INDEXER_VELOCITY_MULT] = 0.95f;
+  configVal[UNITSTATE_MAX_WEIGHT_MS] = 150.f;
+  configVal[UNITSTATE_MIN_WEIGHT_MS] = 500.f;
+  configVal[UNITSTATE_MAX_WEIGHT] = 1.f;
+  configVal[UNITSTATE_MIN_WEIGHT] = 0.01f;
   configVal[COMMS_REDUNDANCY] = 3.f;
   configVal[PRESENCE_TOF_DIST_SENSE] = 2000.f;
   configVal[PRESENCE_TOF_DIST_BLOCK] = 50.f;
@@ -54,12 +43,6 @@ void setupConfig() {
   configVal[WAVE_ACTIVE_MS] = 30000.f;
   configVal[WAVE_IDLE_ANIM_MS] = 6000.f;
   configVal[WAVE_IDLE_ANIM_RARITY] = 400.f;
-  configVal[WAVE_RIPPLE_AHEAD] = 1.5f;
-  
-  configVal[UNITSTATE_MAX_WEIGHT_MS] = 150.f;
-  configVal[UNITSTATE_MIN_WEIGHT_MS] = 500.f;
-  configVal[UNITSTATE_MAX_WEIGHT] = 1.f;
-  configVal[UNITSTATE_MIN_WEIGHT] = 0.01f;
   
   Wire.begin();
 }
