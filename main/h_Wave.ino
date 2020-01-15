@@ -6,12 +6,11 @@
 #define FRAME_MS 20
 
 PhysicalMovement physical;
-float currentOpening = 0.f;
 
 unsigned long lastFrameMs = 0;
-unsigned long lastTriggerMs = 0;
 unsigned long idleTrigger = 0;
 
+float currentOpening = 0.f;
 float lastD = NO_PEAK;
 
 void setupWave() {
@@ -32,17 +31,7 @@ void setupWave() {
 
 void tickVelocities() {
   // For each unit, update the waves that are rippling along.
-  for (int i = units.lowestNegative; i <= units.highestPositive; i++) {
-    UnitState* state = units.getState(i);
-    state->offset += state->velocity / float(FRAME_MS);
-
-    float rippleAhead = getConfigf(WAVE_RIPPLE_AHEAD);
-    if (state->velocity > 0.f) {
-      state->offset = min(state->offset, rippleAhead);
-    } else {
-      state->offset = max(state->offset, -rippleAhead);
-    }
-  }
+  
 }
 
 /**
@@ -60,13 +49,17 @@ void tickWave() {
     lastD = d;
   }
 
-  unsigned long now = millis();
-  if (abs(d) < NO_PEAK) {
-    lastTriggerMs = now;
-  }
-
   // Calculate how far this unit should open the panel depending on the nearest peak.
+  unsigned long lastTriggerMs = 0;
+  for (int d = units.lowestNegative; d <= units.highestPositive; d++) {
+    UnitState* state = units.getState(d);
+    if (state->getTriggerTime() > lastTriggerMs) {
+      lastTriggerMs = state->getTriggerTime();
+    }
+  }
+  
   float targetOpening;
+  unsigned long now = millis();
   if (now - lastTriggerMs < getConfigi(WAVE_ACTIVE_MS)) {
     targetOpening = peakNormalizedGaussian(abs(d));
   } else {

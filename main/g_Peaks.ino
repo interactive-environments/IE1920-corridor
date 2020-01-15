@@ -31,13 +31,12 @@ float peakNormalizedGaussian(float d) {
  */
 float nearestPeak() {
   float nearestPeak = NO_PEAK;
-  for (int d = units.lowestNegative; d <= units.highestPositive; d++) {
-    UnitState* state = units.getState(d);
-    if (state->hasPresence()) {
-      float statePeak = float(d) + state->offset;
-      if (abs(statePeak) < abs(nearestPeak)) {
-        nearestPeak = statePeak;
-      }
+  PresenceState ps;
+  ps.calculate();
+  for (int i = 0; i < ps.getPresenceCount(); i++) {
+    Presence* p = ps.getPresence(i);
+    if (abs(p->pos) < abs(nearestPeak)) {
+      nearestPeak = p->pos;
     }
   }
   return nearestPeak;

@@ -1,7 +1,7 @@
 #include <Wire.h>
 
 #define I2C_SERVER_ADDR 18
-#define CONFIG_COUNT 20
+#define CONFIG_COUNT 30
 #define INITIAL_WAIT_MICROSECONDS 2500
 #define CHAR_WAIT_MICROSECONDS 500
 
@@ -24,6 +24,12 @@
 #define WAVE_IDLE_ANIM_RARITY 15
 #define WAVE_RIPPLE_AHEAD 16
 
+#define UNITSTATE_MAX_WEIGHT_MS 17
+#define UNITSTATE_MIN_WEIGHT_MS 18
+#define UNITSTATE_MAX_WEIGHT 19
+#define UNITSTATE_MIN_WEIGHT 20
+#define PRESENCESTATE_SPLIT_MS 21
+
 float configVal[CONFIG_COUNT];
 unsigned long lastConfigUpdate = 0;
 
@@ -40,7 +46,7 @@ void setupConfig() {
   configVal[INDEXER_ADD_DIST] = 0.05f;
   configVal[INDEXER_VELOCITY_MULT] = 0.95f;
   configVal[COMMS_REDUNDANCY] = 3.f;
-  configVal[PRESENCE_TOF_DIST_SENSE] = 1750.f;
+  configVal[PRESENCE_TOF_DIST_SENSE] = 2000.f;
   configVal[PRESENCE_TOF_DIST_BLOCK] = 50.f;
   configVal[PRESENCE_PIR_ENABLED] = 0.f;
   configVal[PEAKS_SIGMA] = 1.f;
@@ -49,6 +55,11 @@ void setupConfig() {
   configVal[WAVE_IDLE_ANIM_MS] = 6000.f;
   configVal[WAVE_IDLE_ANIM_RARITY] = 400.f;
   configVal[WAVE_RIPPLE_AHEAD] = 1.5f;
+  
+  configVal[UNITSTATE_MAX_WEIGHT_MS] = 150.f;
+  configVal[UNITSTATE_MIN_WEIGHT_MS] = 500.f;
+  configVal[UNITSTATE_MAX_WEIGHT] = 1.f;
+  configVal[UNITSTATE_MIN_WEIGHT] = 0.01f;
   
   Wire.begin();
 }

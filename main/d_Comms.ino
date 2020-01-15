@@ -3,8 +3,6 @@
 #define MAX_PACKET_LENGTH 12
 #define MAX_RECV_LENGTH 64
 
-UnitIndexer units;
-
 /**
  * Index 0 is the previous unit, while index 1 is the next unit.
  * Checksums are used to make sure the message is not corrupted,
@@ -16,6 +14,8 @@ Stream* Conn[2];
 String buff[2];
 bool hasChecksum[2];
 byte checksum[2];
+
+UnitIndexer units;
 
 void setupComms() {
   Conn[0] = &Serial2;
