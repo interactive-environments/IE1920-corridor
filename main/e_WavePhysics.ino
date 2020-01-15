@@ -117,32 +117,32 @@ void WavePhysics::tickPhysicsCalc(float frametime, Wave* wave) {
   float posOffset = wave->targetPos - wave->pos;
   float catchUpMaxTime = getConfigf(WAVE_CATCH_UP_MAX_TIME);
   float catchUpMinTime = getConfigf(WAVE_CATCH_UP_MIN_TIME);
-  
+
+  // Invert every check if the target position is behind us.
+  // This is done by multiplying by a direction variable.
   float dir = posOffset >= 0.f ? 1.f : -1.f;
-  if (wave->velocity * catchUpMinTime > posOffset) {
+  if (dir * wave->velocity * catchUpMinTime > abs(posOffset)) {
     // Will overshoot after a while, so decrease speed.
-    wave->velocity -= dir * getConfigf(WAVE_SLOW_DOWN_ACC) * frametime;
+    // Note: This can still overshoot.
+    wave->velocity -= dir * getConfigf(WAVE_SLOW_DOWN_ACCEL) * frametime;
 
     // We might be going too slow now, so have a limit.
     float bestVelocity = posOffset / catchUpMinTime;
-    if (posOffset >= 0.f) {
-      if (wave->velocity < bestVelocity) {
-        // Going too slow towards the right.
-        wave->velocity = bestVelocity;
-      }
-    } else if (wave->velocity > bestVelocity) {
+    if (dir * wave->velocity < dir * bestVelocity) {
       wave->velocity = bestVelocity;
     }
-  } else if (wave->velocity * catchUpMaxTime < posOffset) {
+  } else if (dir * wave->velocity * catchUpMaxTime < abs(posOffset)) {
     // Will not catch up within allocated time, so increase speed.
-    wave->velocity += dir * getConfigf(WAVE_SPEED_UP_ACC) * frametime;
+    // The wave might also have a velocity in the wrong direction,
+    // and this will correct it over time.
+    wave->velocity += dir * getConfigf(WAVE_SPEED_UP_ACCEL) * frametime;
   }
 
   // Smoothly update sigmas.
   if (wave->targetSigma > wave->sigma) {
-    wave->sigma = min(wave->sigma + getConfigf(WAVE_SIGMA_CHANGE_SPEED), wave->targetSigma);
+    wave->sigma = min(wave->sigma + getConfigf(WAVE_SIGMA_CHANGE_SPEED) * frametime, wave->targetSigma);
   } else if (wave->targetSigma < wave->sigma) {
-    wave->sigma = max(wave->sigma - getConfigf(WAVE_SIGMA_CHANGE_SPEED), wave->targetSigma);
+    wave->sigma = max(wave->sigma - getConfigf(WAVE_SIGMA_CHANGE_SPEED) * frametime, wave->targetSigma);
   }
 }
 
