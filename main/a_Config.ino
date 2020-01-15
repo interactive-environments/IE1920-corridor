@@ -16,11 +16,18 @@
 #define PRESENCE_TOF_DIST_BLOCK 9
 #define PRESENCE_PIR_ENABLED 10
 #define PEAKS_SIGMA 11
-#define WAVE_EXP_CHANGE_RATE 12
 #define WAVE_ACTIVE_MS 13
 #define WAVE_IDLE_ANIM_MS 14
 #define WAVE_IDLE_ANIM_RARITY 15
 #define WAVE_ASYM_OFFSET 16
+#define PHYSICS_MAX_DIST 17
+#define PHYSICS_WAVE_TIMEOUT_MS 18
+#define PHYSICS_AMPLITUDE_SPEED 19
+#define WAVE_SPEED_UP_DIST 20
+#define WAVE_SPEED_UP_ACC 21
+#define WAVE_SLOW_DOWN_DIST 22
+#define WAVE_SLOW_DOWN_ACC 23
+#define WAVE_SHOW_DIRECT_PRESENCE 24
 
 float configVal[CONFIG_COUNT];
 unsigned long lastConfigUpdate = 0;
@@ -40,11 +47,18 @@ void setupConfig() {
   configVal[PRESENCE_TOF_DIST_BLOCK] = 50.f;
   configVal[PRESENCE_PIR_ENABLED] = 0.f;
   configVal[PEAKS_SIGMA] = 1.f;
-  configVal[WAVE_EXP_CHANGE_RATE] = 0.1f;
   configVal[WAVE_ACTIVE_MS] = 30000.f;
   configVal[WAVE_IDLE_ANIM_MS] = 6000.f;
   configVal[WAVE_IDLE_ANIM_RARITY] = 400.f;
   configVal[WAVE_ASYM_OFFSET] = 0.f;
+  configVal[PHYSICS_MAX_DIST] = 3.f;
+  configVal[PHYSICS_WAVE_TIMEOUT_MS] = 1500.f;
+  configVal[PHYSICS_AMPLITUDE_SPEED] = 2.f;
+  configVal[WAVE_SPEED_UP_DIST] = 0.5f;
+  configVal[WAVE_SPEED_UP_ACC] = 5.f;
+  configVal[WAVE_SLOW_DOWN_DIST] = 0.01f;
+  configVal[WAVE_SLOW_DOWN_ACC] = 4.f;
+  configVal[WAVE_SHOW_DIRECT_PRESENCE] = 0.f;
   
   Wire.begin();
 }

@@ -6,9 +6,7 @@
 #define FRAME_MS 20
 
 PhysicalMovement physical;
-
-// TO REMOVE
-float currentOpening = 0.f;
+WavePhysics physics;
 
 unsigned long lastFrameMs = 0;
 unsigned long idleTrigger = 0;
@@ -46,7 +44,7 @@ void tickWave() {
   float targetOpening = 0.f;
 
   // Just for logging.
-  float targetOffset = NO_PEAK;
+  float targetPos = NO_PEAK;
 
   /**
    * Looks at all the units in the system and tries to find the unit with the
@@ -54,22 +52,49 @@ void tickWave() {
    */
   PresenceState ps;
   ps.calculate();
-  for (int i = 0; i < ps.getPresenceCount(); i++) {
-    Presence* p = ps.getPresence(i);
-    float offset = getConfigf(WAVE_ASYM_OFFSET);
-    float opening = peakNormalizedGaussian(abs(p->pos + offset), max(1.f, p->weight));
+  physics.tick(&ps, FRAME_MS);
+  
+  slogln("");
+  Serial.print(String(physics.getWaveCount()));
+  for (int i = 0; i < physics.getWaveCount(); i++) {
+    Wave* wave = physics.getWave(i);
+    float pos = wave->pos + getConfigf(WAVE_ASYM_OFFSET);
+    float opening = peakNormalizedGaussian(abs(pos), max(1.f, wave->sigma)) * wave->amplitude;
     if (opening > targetOpening) {
       targetOpening = opening;
-      targetOffset = offset;
+      targetPos = pos;
+    }
+    Serial.print(" {");
+    Serial.print(String(pos));
+    Serial.print("|");
+    Serial.print(String(opening));
+    Serial.print("} ");
+  }
+  Serial.println("");
+
+  // REMOVE FROM PRODUCTION CODE
+  if (getConfigi(WAVE_SHOW_DIRECT_PRESENCE) == 1) {
+    targetOpening = 0.f;
+    targetPos = NO_PEAK;
+    for (int i = 0; i < ps.getPresenceCount(); i++) {
+      Presence* p = ps.getPresence(i);
+      float pos = p->pos + getConfigf(WAVE_ASYM_OFFSET);
+      float opening = peakNormalizedGaussian(abs(pos), max(1.f, p->weight));
+      if (opening > targetOpening) {
+        targetOpening = opening;
+        targetPos = pos;
+      }
     }
   }
   
   if (IS_DEBUG) {
-    if (lastD != targetOffset) {
-      Serial.print(targetOffset == NO_PEAK ? "NO PEAK " : "Nearest peak = ");
-      Serial.println(String(targetOffset));
+    if (lastD != targetPos) {
+      Serial.print(targetPos == NO_PEAK ? "NO PEAK " : "Nearest peak = ");
+      Serial.print(String(targetPos));
+      Serial.print(" -> ");
+      Serial.println(targetOpening);
     }
-    lastD = targetOffset;
+    lastD = targetPos;
   }
 
   // Calculate how far this unit should open the panel depending on the nearest peak.
@@ -101,13 +126,7 @@ void tickWave() {
     }
   }
   
-  // Use an exponent to smooth out this calculation in case these is a sudden jump,
-  // like on the first panel.
-  float expChangeRate = getConfigf(WAVE_EXP_CHANGE_RATE);
-  currentOpening = currentOpening * (1.f - expChangeRate) + targetOpening * expChangeRate;
-  physical.setTarget(currentOpening);
-
-  slogln(String(currentOpening));
+  physical.setTarget(targetOpening);
 
   // Log presence by enabling the debug LED.
   digitalWrite(LED_BUILTIN, units.getState(0)->hasPresence() ? HIGH : LOW);

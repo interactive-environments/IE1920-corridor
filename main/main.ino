@@ -1,4 +1,4 @@
-bool IS_DEBUG = true;
+bool IS_DEBUG = false;
 
 // Headers for methods in other files. The entry point always gets
 // compiled before other files, so we need these to be able to call them.

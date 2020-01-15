@@ -1,4 +1,4 @@
-#define CHECK_NEIGHBOURS 5
+#define CHECK_NEIGHBOURS 6
 #define MAX_PRESENCES (CHECK_NEIGHBOURS * 2 + 1)
 
 struct Presence {
