@@ -1,4 +1,5 @@
 bool IS_DEBUG = false;
+bool IS_DEBUG_WAVE = true;
 
 // Headers for methods in other files. The entry point always gets
 // compiled before other files, so we need these to be able to call them.
@@ -36,6 +37,7 @@ void setup() {
   }
   if (!Serial) {
     IS_DEBUG = false;
+    IS_DEBUG_WAVE = false;
   }
   slogln("Start");
 

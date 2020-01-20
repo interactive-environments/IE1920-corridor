@@ -53,54 +53,70 @@ void tickWave() {
   PresenceState ps;
   ps.calculate();
   physics.tick(&ps, FRAME_MS);
-  
-  slogln("");
-  Serial.print("W");
-  Serial.print(String(physics.getWaveCount()));
-  for (int i = 0; i < physics.getWaveCount(); i++) {
-    Wave* wave = physics.getWave(i);
-    float pos = wave->pos + getConfigf(WAVE_ASYM_OFFSET);
-    float opening = peakNormalizedGaussian(abs(pos), max(1.f, wave->sigma)) * wave->amplitude;
-    if (opening > targetOpening) {
-      targetOpening = opening;
-      targetPos = pos;
-    }
-    Serial.print(" {pos=");
-    Serial.print(String(wave->pos));
-    Serial.print("|s=");
-    Serial.print(String(wave->sigma));
-    Serial.print("|a=");
-    Serial.print(String(wave->amplitude));
-    Serial.print("|v=");
-    Serial.print(String(wave->velocity));
-    Serial.print("|o=");
-    Serial.print(String(opening));
-    Serial.print("} ");
-  }
-  Serial.println("");
 
-  // REMOVE FROM PRODUCTION CODE
-  Serial.print("P");
-  Serial.print(String(ps.getPresenceCount()));
-  if (getConfigi(WAVE_SHOW_DIRECT_PRESENCE) == 1 || true) {
-    //targetOpening = 0.f;
-    //targetPos = NO_PEAK;
+
+  if (getConfigi(WAVE_SHOW_DIRECT_PRESENCE) == 1) {
+    // Bypass mode: Directly track presence.
     for (int i = 0; i < ps.getPresenceCount(); i++) {
       Presence* p = ps.getPresence(i);
       float pos = p->pos + getConfigf(WAVE_ASYM_OFFSET);
       float opening = peakNormalizedGaussian(abs(pos), max(1.f, p->weight));
-      //if (opening > targetOpening) {
-      //  targetOpening = opening;
-      //  targetPos = pos;
-      //}
-      Serial.print(" {p=");
+      if (opening > targetOpening) {
+        targetOpening = opening;
+        targetPos = pos;
+      }
+    }
+  } else {
+    // Default mode: Show waves using presence.
+    for (int i = 0; i < physics.getWaveCount(); i++) {
+      Wave* wave = physics.getWave(i);
+      float pos = wave->pos + getConfigf(WAVE_ASYM_OFFSET);
+      float opening = peakNormalizedGaussian(abs(pos), max(1.f, wave->sigma)) * wave->amplitude;
+      if (opening > targetOpening) {
+        targetOpening = opening;
+        targetPos = pos;
+      }
+    }
+  }
+
+  if (IS_DEBUG_WAVE) {
+    Serial.println("");
+
+    // Debug presence.
+    Serial.print("P");
+    Serial.print(String(ps.getPresenceCount()));
+    for (int i = 0; i < ps.getPresenceCount(); i++) {
+      Presence* p = ps.getPresence(i);
+      Serial.print(" {pos=");
       Serial.print(String(p->pos));
-      Serial.print("|w=");
+      Serial.print("|weight=");
       Serial.print(String(p->weight));
       Serial.print("} ");
     }
+    Serial.println("");
+
+    // Debug waves.
+    Serial.print("W");
+    Serial.print(String(physics.getWaveCount()));
+    for (int i = 0; i < physics.getWaveCount(); i++) {
+      Wave* wave = physics.getWave(i);
+      float pos = wave->pos + getConfigf(WAVE_ASYM_OFFSET);
+      float opening = peakNormalizedGaussian(abs(pos), max(1.f, wave->sigma)) * wave->amplitude;
+      
+      Serial.print(" {pos=");
+      Serial.print(String(wave->pos));
+      Serial.print("|sigma=");
+      Serial.print(String(wave->sigma));
+      Serial.print("|amplitude=");
+      Serial.print(String(wave->amplitude));
+      Serial.print("|velocity=");
+      Serial.print(String(wave->velocity));
+      Serial.print("|oopening=");
+      Serial.print(String(opening));
+      Serial.print("} ");
+    }
+    Serial.println("");
   }
-  Serial.println("");
   
   if (IS_DEBUG) {
     if (lastD != targetPos) {
