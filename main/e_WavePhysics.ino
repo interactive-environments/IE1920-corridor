@@ -1,10 +1,9 @@
-#define MAX_WAVES MAX_PRESENCES
-
 struct Wave {
   unsigned long lastUpdate;
   float pos;
   float targetPos;
   float velocity;
+  float velocityDir;
   float sigma;
   float targetSigma;
   float amplitude;
@@ -17,7 +16,7 @@ class WavePhysics {
     Wave* getWave(int index);
   
   private:
-    Wave waves[MAX_WAVES];
+    Wave waves[MAX_UNITS];
     int waveCount = 0;
 
     void tickPhysics(float frametime);
@@ -29,16 +28,23 @@ class WavePhysics {
 };
 
 void WavePhysics::tick(PresenceState* ps, int frametimems) {
-  bool waveFoundForPresence[MAX_PRESENCES];
-  for (int i = 0; i < MAX_PRESENCES; i++) {
+  bool waveFoundForPresence[MAX_UNITS];
+  for (int i = 0; i < MAX_UNITS; i++) {
     waveFoundForPresence[i] = false;
   }
 
   // Remove colliding waves.
-  for (int i = getWaveCount() - 1; i >= 0; i--) {
+  for (int i = getWaveCount() - 1; i > 0; i--) {
     float pos = getWave(i)->pos;
     for (int j = 0; j < i - 1; j++) {
       if (abs(pos - getWave(j)->pos) < getConfigf(WAVE_COLLIDE_REMOVE)) {
+        if (IS_DEBUG) {
+          Serial.print("Merging ");
+          Serial.print(i);
+          Serial.print(" into ");
+          Serial.println(j);
+        }
+        
         mergeWaves(i, j);
         removeWave(i);
         break;
@@ -62,10 +68,12 @@ void WavePhysics::tick(PresenceState* ps, int frametimems) {
 
     // Found a presence, so update data.
     if (bestPresence != -1) {
-      Serial.print("Updating wave ");
-      Serial.print(i);
-      Serial.print(" with data from presence ");
-      Serial.println(bestPresence);
+      if (IS_DEBUG) {
+        Serial.print("Updating wave ");
+        Serial.print(i);
+        Serial.print(" with data from presence ");
+        Serial.println(bestPresence);
+      }
       
       waveFoundForPresence[bestPresence] = true;
       updateWave(wave, ps->getPresence(bestPresence));
@@ -97,7 +105,8 @@ void WavePhysics::tickPhysics(float frametime) {
     Wave* wave = getWave(i);
     unsigned long timeSinceUpdate = millis() - wave->lastUpdate;
     float ampChangeSpeed = getConfigf(PHYSICS_AMPLITUDE_SPEED);
-    
+
+    // First update the standard deviation of the wave.
     if (timeSinceUpdate < getConfigi(PHYSICS_WAVE_TIMEOUT_MS)) {
       // Grow the wave
       wave->amplitude = min(1.f, wave->amplitude + ampChangeSpeed * frametime);
@@ -121,7 +130,11 @@ void WavePhysics::tickPhysicsCalc(float frametime, Wave* wave) {
   // Invert every check if the target position is behind us.
   // This is done by multiplying by a direction variable.
   float dir = posOffset >= 0.f ? 1.f : -1.f;
-  if (dir * wave->velocity * catchUpMinTime > abs(posOffset)) {
+  if (dir * wave->velocityDir < 0.f) {
+    // The wave overshot, it went further than target position.
+    // This should fix itself in the next cycle when the presence updates.
+    // If it does not, just let it continue its movement.
+  } else if (dir * wave->velocity * catchUpMinTime > abs(posOffset)) {
     // Will overshoot after a while, so decrease speed.
     // Note: This can still overshoot.
     wave->velocity -= dir * getConfigf(WAVE_SLOW_DOWN_ACCEL) * frametime;
@@ -152,8 +165,9 @@ void WavePhysics::addWave(Presence* presence) {
   wave->pos = presence->pos;
   wave->targetPos = presence->pos + getConfigf(WAVE_ASYM_OFFSET);
   wave->velocity = 0.f;
+  wave->velocityDir = wave->targetPos - wave->pos;
   wave->sigma = presence->weight;
-  wave->targetSigma = presence->weight;
+  wave->targetSigma = wave->sigma;
   wave->amplitude = 0.f;
 }
 
@@ -161,6 +175,7 @@ void WavePhysics::updateWave(Wave* wave, Presence* presence) {
   wave->lastUpdate = millis();
   wave->targetPos = presence->pos + getConfigf(WAVE_ASYM_OFFSET);
   wave->targetSigma = presence->weight;
+  wave->velocityDir = wave->targetPos - wave->pos;
 }
 
 // Removes a wave that does not have a presence associated anymore.
@@ -181,6 +196,6 @@ void WavePhysics::mergeWaves(int i, int j) {
   wj->targetPos = (wi->targetPos + wj->targetPos) / 2.f;
   wj->velocity = (wi->velocity + wj->velocity) / 2.f;
   wj->sigma = (wi->sigma + wj->sigma) / 2.f;
-  wj->targetSigma = (wi->targetSigma + wj->targetSigma) / 2.f;
+  wj->targetSigma = wi->targetSigma + wj->targetSigma; // Grow.
   wj->amplitude = max(wi->amplitude, wj->amplitude);
 }

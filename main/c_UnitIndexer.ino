@@ -15,6 +15,7 @@ class UnitIndexer {
 
     bool handlePacket(int offset, String packet);
     UnitState* getState(int offset);
+    int getUnitCount();
   private:
     UnitState states[MAX_UNITS];
 
@@ -64,6 +65,10 @@ UnitState* UnitIndexer::getState(int offset) {
     return &states[index];
   }
   return &states[0];
+}
+
+int UnitIndexer::getUnitCount() {
+  return highestPositive - lowestNegative + 1;
 }
 
 int UnitIndexer::stateIndex(int offset) {

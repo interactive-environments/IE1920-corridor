@@ -1,6 +1,3 @@
-#define CHECK_NEIGHBOURS 6
-#define MAX_PRESENCES (CHECK_NEIGHBOURS * 2 + 1)
-
 struct Presence {
   float pos;
   float weight;
@@ -14,7 +11,7 @@ class PresenceState {
     void calculate();
 
   private:
-    Presence presences[MAX_PRESENCES];
+    Presence presences[MAX_UNITS];
     int presenceCount = 0;
 };
 
@@ -33,10 +30,11 @@ void PresenceState::addPresence(float pos, float weight) {
 }
 
 void PresenceState::calculate() {
-  bool isProcessed[MAX_PRESENCES];
+  bool isProcessed[MAX_UNITS];
   // Disable units that are not connected.
-  for (int i = -CHECK_NEIGHBOURS; i <= CHECK_NEIGHBOURS; i++) {
-    isProcessed[i + CHECK_NEIGHBOURS] = i < units.lowestNegative || i > units.highestPositive;
+  int unitCount = units.getUnitCount();
+  for (int i = 0; i < MAX_UNITS; i++) {
+    isProcessed[i] = i >= unitCount;
   }
   /*
   for (int i = -units.lowestNegative; i <= units.highestPositive; i++) {
@@ -50,9 +48,10 @@ void PresenceState::calculate() {
     // Check where to start the next group.
     int latestTriggerIndex;
     unsigned long latestTriggerTime = 0;
-    for (int i = -CHECK_NEIGHBOURS; i <= CHECK_NEIGHBOURS; i++) {
+    for (int i = -units.lowestNegative; i <= units.highestPositive; i++) {
       // Ignore units that do not identify as triggered.
-      if (!isProcessed[i + CHECK_NEIGHBOURS] && units.getState(i)->hasPresence()) {
+      if (!isProcessed[i - units.lowestNegative]
+          && units.getState(i)->hasPresence()) {
         unsigned long t = units.getState(i)->getTriggerTime();
         if (t > latestTriggerTime) {
           latestTriggerIndex = i;
@@ -62,19 +61,20 @@ void PresenceState::calculate() {
     }
 
     if (latestTriggerTime > 0) {
+      isProcessed[latestTriggerIndex - units.lowestNegative] = true;
+      
       // Collect all that belong in this group.
-      isProcessed[latestTriggerIndex + CHECK_NEIGHBOURS] = true;
       float weight = units.getState(latestTriggerIndex)->getPresenceWeight();
       float totalWeight = weight;
       float totalPosition = weight * float(latestTriggerIndex);
 
-      // Check both sides.
+      // Check both sides for adding presence to the center.
       for (int dir = -1; dir <= 1; dir += 2) {
         bool skippedLast = false;
         for (int i = latestTriggerIndex + dir;
-            i >= -CHECK_NEIGHBOURS && i <= CHECK_NEIGHBOURS && !isProcessed[i + CHECK_NEIGHBOURS];
+            i >= units.lowestNegative && i <= units.highestPositive && !isProcessed[i - units.lowestNegative];
             i += dir) {
-          isProcessed[i + CHECK_NEIGHBOURS] = true;
+          isProcessed[i - units.lowestNegative] = true;
           UnitState* state = units.getState(i);
           if (state->hasPresence()) {
             skippedLast = false;
