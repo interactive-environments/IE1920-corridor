@@ -1,4 +1,4 @@
-bool IS_DEBUG = false;
+bool IS_DEBUG = true;
 bool IS_DEBUG_WAVE = true;
 
 // Headers for methods in other files. The entry point always gets

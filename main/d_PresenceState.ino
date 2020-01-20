@@ -48,7 +48,7 @@ void PresenceState::calculate() {
     // Check where to start the next group.
     int latestTriggerIndex;
     unsigned long latestTriggerTime = 0;
-    for (int i = -units.lowestNegative; i <= units.highestPositive; i++) {
+    for (int i = units.lowestNegative; i <= units.highestPositive; i++) {
       // Ignore units that do not identify as triggered.
       if (!isProcessed[i - units.lowestNegative]
           && units.getState(i)->hasPresence()) {

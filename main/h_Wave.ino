@@ -111,7 +111,7 @@ void tickWave() {
       Serial.print(String(wave->amplitude));
       Serial.print("|velocity=");
       Serial.print(String(wave->velocity));
-      Serial.print("|oopening=");
+      Serial.print("|opening=");
       Serial.print(String(opening));
       Serial.print("} ");
     }
