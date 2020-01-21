@@ -29,17 +29,10 @@ void setupWave() {
   randomSeed((analogRead(A0) << 20) + (analogRead(A4) << 10) + analogRead(A5));
 }
 
-void tickVelocities() {
-  // For each unit, update the waves that are rippling along.
-  
-}
-
 /**
  * A single tick event.
  */
 void tickWave() {
-  tickVelocities();
-
   // Handle panel rotation.
   float targetOpening = 0.f;
 
@@ -53,7 +46,6 @@ void tickWave() {
   PresenceState ps;
   ps.calculate();
   physics.tick(&ps, FRAME_MS);
-
 
   if (getConfigi(WAVE_SHOW_DIRECT_PRESENCE) == 1) {
     // Bypass mode: Directly track presence.

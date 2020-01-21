@@ -52,12 +52,12 @@ void setupConfig() {
   configVal[WAVE_ACTIVE_MS] = 30000.f;
   configVal[WAVE_IDLE_ANIM_MS] = 6000.f;
   configVal[WAVE_IDLE_ANIM_RARITY] = 1500.f;
-  configVal[WAVE_ASYM_OFFSET] = 1.5f;
-  configVal[PHYSICS_MAX_DIST] = 4.f;
+  configVal[WAVE_ASYM_OFFSET] = 2.f;
+  configVal[PHYSICS_MAX_DIST] = 6.f;
   configVal[PHYSICS_WAVE_TIMEOUT_MS] = 1500.f;
   configVal[PHYSICS_AMPLITUDE_SPEED] = 1.f;
-  configVal[WAVE_CATCH_UP_MAX_TIME] = 0.6f;
-  configVal[WAVE_SPEED_UP_ACCEL] = 3.f;
+  configVal[WAVE_CATCH_UP_MAX_TIME] = 0.5f;
+  configVal[WAVE_SPEED_UP_ACCEL] = 5.f;
   configVal[WAVE_CATCH_UP_MIN_TIME] = 0.1f;
   configVal[WAVE_SLOW_DOWN_ACCEL] = 8.f;
   configVal[WAVE_SHOW_DIRECT_PRESENCE] = 0.f;

@@ -35,21 +35,26 @@ void WavePhysics::tick(PresenceState* ps, int frametimems) {
 
   // Remove colliding waves.
   for (int i = getWaveCount() - 1; i > 0; i--) {
+    slog("i");
+    slog(String(i));
     float pos = getWave(i)->pos;
-    for (int j = 0; j < i - 1; j++) {
+    for (int j = 0; j < i; j++) {
+      slog("j");
+      slog(String(j));
+      slog(String(abs(pos - getWave(j)->pos)));
       if (abs(pos - getWave(j)->pos) < getConfigf(WAVE_COLLIDE_REMOVE)) {
-        if (IS_DEBUG) {
-          Serial.print("Merging ");
-          Serial.print(i);
-          Serial.print(" into ");
-          Serial.println(j);
-        }
+        slog("Merging ");
+        slog(String(i));
+        slog(" into ");
+        slog(String(j));
+        slogln("");
         
         mergeWaves(i, j);
         removeWave(i);
         break;
       }
     }
+    slogln("");
   }
     
   // Try to match each wave to a presence.
@@ -163,7 +168,7 @@ void WavePhysics::addWave(Presence* presence) {
   Wave* wave = &waves[waveCount++];
   wave->lastUpdate = millis();
   wave->pos = presence->pos;
-  wave->targetPos = presence->pos + getConfigf(WAVE_ASYM_OFFSET);
+  wave->targetPos = presence->pos;
   wave->velocity = 0.f;
   wave->velocityDir = wave->targetPos - wave->pos;
   wave->sigma = presence->weight;
@@ -173,7 +178,7 @@ void WavePhysics::addWave(Presence* presence) {
 
 void WavePhysics::updateWave(Wave* wave, Presence* presence) {
   wave->lastUpdate = millis();
-  wave->targetPos = presence->pos + getConfigf(WAVE_ASYM_OFFSET);
+  wave->targetPos = presence->pos;
   wave->targetSigma = presence->weight;
   wave->velocityDir = wave->targetPos - wave->pos;
 }
