@@ -9,6 +9,7 @@ In this corridor, there are modular units, that can be hotplugged while the syst
 
 Each unit has one board to control all peripherals of that unit.
 This board can be any 5V microcontroller with enough ports to power all peripherals.
+In our setup, custom Arduino Mega 2560 boards were used.
 The table below gives an overview of all peripherals used by the system.
 
 | Port | Hardware | Function |
@@ -31,11 +32,24 @@ This layer contains the presence grouping, motor control, light dimming and wave
 
 ### Decentralization
 
-Track Everything
-Serial
-Control Panel
+There is no central server controlling the setup.
+Each microcontroller tracks all events, and decides what to do by using that data.
+The microcontroller communicate events they perceive over chained serial to all other units.
+Because of this setup, changing constants in the system is a tedious process.
+To prevent having to re-upload the code to all units for every small change, a control panel can be used.
+There is a global configuration in each unit that contains all numerical constants.
+The control panel used for the demo system in the exhibition was an Arduino Nano 33 IoT,
+running the NanoSerialTest found in the "test" folder.
+However, any Arduino can implement the control panel protocol over I2C.
+When the control panel uploads a command to the unit it is connected to,
+that unit will distribute it over serial to all other units.
+Each unit will update their global configuration during runtime, making it easier to test changes.
 
 ### Physics
 
-Presence
-Wave
+The goal of the corridor is to show waves flowing through the panels.
+This is done by emulating the physics of real waves, with an amplitude, size and velocity.
+Every frame (20 ms) the velocity is updated by estimating where people are,
+and then the velocity is used to update the position.
+When two waves collide, they are merged into one.
+Similarly, if humans spread out into a larger area, the wave is split.
