@@ -53,3 +53,7 @@ Every frame (20 ms) the velocity is updated by estimating where people are,
 and then the velocity is used to update the position.
 When two waves collide, they are merged into one.
 Similarly, if humans spread out into a larger area, the wave is split.
+
+### Setup
+
+To compile the main code, a modified Time of Flight library is needed. This can be found here: https://github.com/amirzaidi/Grove-Ranging-sensor-VL53L0X
