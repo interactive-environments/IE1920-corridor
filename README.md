@@ -1,8 +1,8 @@
-# Back2Earth
+# ReTurn
 
 ## Introduction
 
-Back2Earth is an interactive corridor powered by many connected microcontrollers.
+ReTurn is an interactive corridor powered by many connected microcontrollers.
 In this corridor, there are modular units, that can be hotplugged while the system is running.
 
 ## System Setup
